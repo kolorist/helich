@@ -1,0 +1,4 @@
+[submodule "externals/floral"]
+	path = externals/floral
+	url = git@bitbucket.org:voidarchon/floral.git
+	branch = master

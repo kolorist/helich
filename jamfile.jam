@@ -1,0 +1,10 @@
+# helich
+
+project
+    : usage-requirements
+    <include>include ;
+
+lib helich :
+    [ glob src/*.cpp ] 
+	/extlibs/floral/<link>static :
+    <include>include ;

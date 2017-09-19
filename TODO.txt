@@ -1,0 +1,7 @@
+- Apply pool allocator for TextureFactory
+	cyHandle -> cyHandleHost
+				[raw pointer] -> PoolAllocator (class Texture)
+				
+- How to handle different memory constraint across multiple scenes?
+	Building a Low-Fragmentation Memory System for 64-bit Games
+	http://s3-2u.digitallyspeaking.com/assets/ubm/gdc/sf16/837869_HARD-v80244-1300.mp4
