@@ -1194,7 +1194,7 @@ void StackWalker::OnCallstackEntry(CallstackEntryType eType, CallstackEntry &ent
 		}
 		else
 			//_snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%s (%d): %s\n", entry.lineFileName, entry.lineNumber, entry.name);
-			_snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%s\n", entry.name);
+			_snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%s (%d)\n", entry.name, entry.lineNumber);
 		if (outBuffer) {
 			strcpy_s(outBuffer, sizeof(buffer), buffer);
 		}
