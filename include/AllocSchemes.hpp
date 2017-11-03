@@ -287,8 +287,8 @@ namespace helich {
 				currBlock->FrameSize = currFrameSize;
 
 				// create new free block
-				//s8* unalignedNBStart = (s8*)currBlock - disp + currBlock->FrameSize;
-				s8* unalignedNBStart = (s8*)currBlock + currBlock->FrameSize;
+				s8* unalignedNBStart = (s8*)currBlock - disp + currBlock->FrameSize;
+				//s8* unalignedNBStart = (s8*)currBlock + currBlock->FrameSize;
 				s8* nbStart = (s8*)alignAddress(unalignedNBStart);
 				u32 nbDisp = (u32)nbStart - (u32)unalignedNBStart;
 				u32 nbFrameSize = oldFrameSize - currFrameSize;
@@ -341,6 +341,7 @@ namespace helich {
 				m_LastAlloc->NextAlloc = currBlock;
 			m_LastAlloc = currBlock;
 			PTracking::Register(currBlock, nBytes, "no-desc", __FILE__, __LINE__);
+			m_UsedBytes += currBlock->FrameSize;
 
 			return dataAddr;
 		}
@@ -375,8 +376,8 @@ namespace helich {
 	template <class PTracking>
 	const bool FreelistScheme<PTracking>::CanJoin(AllocHeaderType* leftBlock, AllocHeaderType* rightBlock)
 	{
-		u32 leftEnd = (u32)((s8*)leftBlock - leftBlock->Adjustment + leftBlock->FrameSize);
-		u32 rightStart = (u32)((s8*)rightBlock - rightBlock->Adjustment);
+		u32 leftEnd = (u32)leftBlock - leftBlock->Adjustment + leftBlock->FrameSize;
+		u32 rightStart = (u32)rightBlock - rightBlock->Adjustment;
 		return (leftEnd == rightStart);
 	}
 
@@ -408,6 +409,7 @@ namespace helich {
 	void FreelistScheme<PTracking>::Free(voidptr pData)
 	{
 		AllocHeaderType* releaseBlock = (AllocHeaderType*)((s8*)pData - sizeof(AllocHeaderType));
+		m_UsedBytes -= releaseBlock->FrameSize;
 		PTracking::Unregister(releaseBlock);
 
 		if (releaseBlock->NextAlloc)
@@ -421,7 +423,7 @@ namespace helich {
 		// search for nearest-after free block
 		AllocHeaderType* nextFree = m_FirstFreeBlock;
 		while (nextFree &&
-			((u32)nextFree < (u32)releaseBlock)) {
+			((u32)nextFree <= (u32)releaseBlock)) {
 			nextFree = nextFree->NextAlloc;
 		}
 		AllocHeaderType* prevFree = nextFree->PrevAlloc;
