@@ -38,6 +38,7 @@ namespace helich {
 		~StackScheme();
 		
 	private:
+		AllocHeaderType*						m_LastAlloc;
 		s8*										m_CurrentMarker;
 	};
 
@@ -98,13 +99,6 @@ namespace helich {
 		static const bool						JoinBlocks(AllocHeaderType* leftBlock, AllocHeaderType* rightBlock);
 		static const bool						CanJoin(AllocHeaderType* leftBlock, AllocHeaderType* rightBlock);
 
-		// for unit testing only
-	public:
-		const u32								UT_GetAllocationCountFromLL() const;
-		const u32								UT_GetFreeBlockCountFromLL() const;
-		AllocHeaderType*						UT_GetLastAlloc() const					{ return m_LastAlloc; }
-		AllocHeaderType*						UT_GetFirstFree() const					{ return m_FirstFreeBlock; }
-
 	protected:
 		~FreelistScheme();
 
@@ -112,6 +106,14 @@ namespace helich {
 		AllocHeaderType*						m_FirstFreeBlock;
 		AllocHeaderType*						m_LastAlloc;
 		const u32								k_MinFrameSize;
+
+	public:
+		const s8*								GetBaseAddress() const 							{ return m_BaseAddress; }
+		const u32								GetSizeInBytes() const							{ return m_SizeInBytes; }
+		const u32								GetUsedBytes() const							{ return m_UsedBytes; }
+
+		u32										pm_AllocCount;
+		u32										pm_FreeCount;
 	};
 
 }

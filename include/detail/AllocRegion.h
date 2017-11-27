@@ -14,7 +14,6 @@ namespace detail {
 			: m_BaseAddress(nullptr)
 			, m_SizeInBytes(0)
 			, m_UsedBytes(0)
-			, m_LastAlloc(nullptr)
 		{ }
 
 	protected:
@@ -25,8 +24,6 @@ namespace detail {
 		s8*										m_BaseAddress;
 		u32										m_SizeInBytes;
 		u32										m_UsedBytes;
-
-		TAllocHeader*							m_LastAlloc;
 	};
 
 }

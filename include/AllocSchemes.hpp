@@ -230,6 +230,8 @@ namespace helich {
 		, m_FirstFreeBlock(nullptr)
 		, k_MinFrameSize(sizeof(AllocHeaderType) + HL_ALIGNMENT + 1)
 		, m_LastAlloc(nullptr)
+		, pm_AllocCount(0)
+		, pm_FreeCount(0)
 	{
 
 	}
@@ -344,6 +346,7 @@ namespace helich {
 			PTracking::Register(currBlock, nBytes, "no-desc", __FILE__, __LINE__);
 			m_UsedBytes += currBlock->FrameSize;
 
+			pm_AllocCount++;
 			return dataAddr;
 		}
 		// nothing found, cannot allocate anything
@@ -412,6 +415,7 @@ namespace helich {
 		AllocHeaderType* releaseBlock = (AllocHeaderType*)((s8*)pData - sizeof(AllocHeaderType));
 		m_UsedBytes -= releaseBlock->FrameSize;
 		PTracking::Unregister(releaseBlock);
+		pm_FreeCount++;
 
 		if (releaseBlock->NextAlloc)
 			releaseBlock->NextAlloc->PrevAlloc = releaseBlock->PrevAlloc;
@@ -452,30 +456,5 @@ namespace helich {
 		m_FirstFreeBlock->Adjustment = 0;
 		m_FirstFreeBlock->NextAlloc = nullptr;
 		m_FirstFreeBlock->PrevAlloc = nullptr;
-	}
-
-	// for unit testing
-	template <class PTracking>
-	const u32 FreelistScheme<PTracking>::UT_GetAllocationCountFromLL() const
-	{
-		AllocHeaderType* currBlock = m_LastAlloc;
-		u32 c = 0;
-		while (currBlock) {
-			c++;
-			currBlock = currBlock->PrevAlloc;
-		}
-		return c;
-	}
-
-	template <class PTracking>
-	const u32 FreelistScheme<PTracking>::UT_GetFreeBlockCountFromLL() const
-	{
-		AllocHeaderType* currFreeBlock = m_FirstFreeBlock;
-		u32 c = 0;
-		while (currFreeBlock) {
-			c++;
-			currFreeBlock = currFreeBlock->NextAlloc;
-		}
-		return c;
 	}
 }
