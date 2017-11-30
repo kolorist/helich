@@ -1,7 +1,7 @@
 #ifndef __HELICH_MEMORY_MAP_H__
 #define __HELICH_MEMORY_MAP_H__
 
-#include <stdaliases.h>
+#include <floral.h>
 
 template <class _AllocatorType>
 struct MemoryRegion {
@@ -12,4 +12,11 @@ struct MemoryRegion {
 	
 	AllocatorPtrType							AllocatorPtr;
 };
+
+struct MemoryRegionInfo {
+	c8											Name[512];
+	u32											SizeInBytes;
+	voidptr										BaseAddress;
+};
+
 #endif // __HELICH_MEMORY_MAP_H__
