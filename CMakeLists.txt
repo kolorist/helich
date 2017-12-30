@@ -7,6 +7,9 @@ include_directories("${PROJECT_SOURCE_DIR}/include")
 file(GLOB_RECURSE file_list
     "${PROJECT_SOURCE_DIR}/src/*.cpp")
 
+add_definitions (-D_CRT_SECURE_NO_WARNINGS
+	-DPLATFORM_WINDOWS)
+
 add_library(helich ${file_list})
 
 target_link_libraries (helich 
