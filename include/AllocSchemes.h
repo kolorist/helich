@@ -7,7 +7,7 @@
 #include "AllocHeaders.h"
 
 // 3rd-party headers
-#include <stdaliases.h>
+#include <floral.h>
 
 namespace helich {
 
@@ -40,6 +40,7 @@ namespace helich {
 	private:
 		AllocHeaderType*						m_LastAlloc;
 		s8*										m_CurrentMarker;
+		floral::mutex							m_AllocMutex;
 	};
 
 	//////////////////////////////////////////////////////////////////////////
@@ -68,6 +69,7 @@ namespace helich {
 		AllocHeaderType*						m_NextFreeSlot;
 		u32										m_ElementSize;
 		u32										m_ElementCount;
+		floral::mutex							m_AllocMutex;
 	};
 
 	//////////////////////////////////////////////////////////////////////////
@@ -106,6 +108,7 @@ namespace helich {
 		AllocHeaderType*						m_FirstFreeBlock;
 		AllocHeaderType*						m_LastAlloc;
 		const u32								k_MinFrameSize;
+		floral::mutex							m_AllocMutex;
 
 	public:
 		const s8*								GetBaseAddress() const 							{ return m_BaseAddress; }

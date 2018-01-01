@@ -7,7 +7,7 @@
 
 #include <stdaliases.h>
 
-BEGIN_HELICH_NAMESPACE
+namespace helich {
 
 class AllocationTracker {
 public:
@@ -31,6 +31,6 @@ private:
 
 extern AllocationTracker						g_HLAllocationTracker;
 
-END_HELICH_NAMESPACE
+}
 
 #endif // __HL_ALLOCATION_TRACKER_H__

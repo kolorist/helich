@@ -30,6 +30,7 @@ namespace helich {
 	template <class PTracking>
 	void StackScheme<PTracking>::MapTo(voidptr baseAddress, const u32 sizeInBytes, const_cstr name)
 	{
+		floral::lock_guard memGuard(m_AllocMutex);
 		m_BaseAddress = (s8*)baseAddress;
 		m_SizeInBytes = sizeInBytes;
 		m_CurrentMarker = (s8*)baseAddress;
@@ -39,6 +40,7 @@ namespace helich {
 	template <class PTracking>
 	voidptr StackScheme<PTracking>::Allocate(const u32 nBytes)
 	{
+		floral::lock_guard memGuard(m_AllocMutex);
 		// the whole stack frame size, count all headers, displacement, data, ...
 		// ....[A..A][H..H][D..D][A'..A']
 		// A: aligning-bytes    : always >= 1 byte
@@ -83,6 +85,7 @@ namespace helich {
 	template <class PTracking>
 	void StackScheme<PTracking>::Free(voidptr pData)
 	{
+		floral::lock_guard memGuard(m_AllocMutex);
 		// get the header position
 		AllocHeaderType* header = (AllocHeaderType*)pData - 1;
 		// now, we can get the frame size
@@ -113,6 +116,7 @@ namespace helich {
 	template <class PTracking>
 	void StackScheme<PTracking>::FreeAll()
 	{
+		floral::lock_guard memGuard(m_AllocMutex);
 		m_CurrentMarker = m_BaseAddress;
 		memset(m_BaseAddress, 0, m_SizeInBytes);
 	}
@@ -139,6 +143,7 @@ namespace helich {
 	template <u32 UElemSize, class PTracking>
 	void PoolScheme<UElemSize, PTracking>::MapTo(voidptr baseAddress, const u32 sizeInBytes, const_cstr name)
 	{
+		floral::lock_guard memGuard(m_AllocMutex);
 		m_ElementSize = ((UElemSize - 1) / HL_ALIGNMENT + 1) * HL_ALIGNMENT + sizeof(AllocHeaderType);
 		m_ElementCount = sizeInBytes / m_ElementSize;
 		m_BaseAddress = (s8*)baseAddress;
@@ -156,6 +161,7 @@ namespace helich {
 	template <u32 UElemSize, class PTracking>
 	voidptr PoolScheme<UElemSize, PTracking>::Allocate()
 	{
+		floral::lock_guard memGuard(m_AllocMutex);
 		// TODO: out of memory assertion
 
 		// we have return address right-away, the memory region was pre-aligned already
@@ -184,6 +190,7 @@ namespace helich {
 	template <u32 UElemSize, class PTracking>
 	void PoolScheme<UElemSize, PTracking>::Free(voidptr pData)
 	{
+		floral::lock_guard memGuard(m_AllocMutex);
 		// calculate position of the will-be-freed slot
 		//u32 idx = ((u32)pData - (u32)m_BaseAddress) / m_ElementSize;
 		AllocHeaderType* header = (AllocHeaderType*)((s8*)pData - sizeof(AllocHeaderType));
@@ -217,6 +224,7 @@ namespace helich {
 	template <u32 UElemSize, class PTracking>
 	void PoolScheme<UElemSize, PTracking>::FreeAll()
 	{
+		floral::lock_guard memGuard(m_AllocMutex);
 		// TODO
 	}
 
@@ -245,6 +253,7 @@ namespace helich {
 	template <class PTracking>
 	void FreelistScheme<PTracking>::MapTo(voidptr baseAddress, const u32 sizeInBytes, const_cstr name)
 	{
+		floral::lock_guard memGuard(m_AllocMutex);
 		m_BaseAddress = (s8*)baseAddress;
 		m_SizeInBytes = sizeInBytes;
 
@@ -272,6 +281,7 @@ namespace helich {
 	template <class PTracking>
 	voidptr FreelistScheme<PTracking>::Allocate(const u32 nBytes)
 	{
+		floral::lock_guard memGuard(m_AllocMutex);
 		// first-fit strategy
 		AllocHeaderType* currBlock = m_FirstFreeBlock;
 		// search
@@ -412,6 +422,7 @@ namespace helich {
 	template <class PTracking>
 	void FreelistScheme<PTracking>::Free(voidptr pData)
 	{
+		floral::lock_guard memGuard(m_AllocMutex);
 		AllocHeaderType* releaseBlock = (AllocHeaderType*)((s8*)pData - sizeof(AllocHeaderType));
 		m_UsedBytes -= releaseBlock->FrameSize;
 		PTracking::Unregister(releaseBlock);
@@ -449,6 +460,7 @@ namespace helich {
 	template <class PTracking>
 	void FreelistScheme<PTracking>::FreeAll()
 	{
+		floral::lock_guard memGuard(m_AllocMutex);
 		memset(m_BaseAddress, 0, m_SizeInBytes);
 
 		m_FirstFreeBlock = (AllocHeaderType*)m_BaseAddress;
