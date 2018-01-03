@@ -7,7 +7,20 @@ if not defined DevEnvDir call %msvcdir%vcvars64.bat >nul
 
 popd %~d0
 
-cl 	/nologo										^
+if not exist "build" md "build"
+if not exist "build/obj" md "build/obj"
+
+rem --------------------------------------------
+rem Compiling
+rem --------------------------------------------
+rem /Fo		object file output path
+rem /Fd		target file output path
+rem /Zi		generate .pdb
+rem /Od		disable optimization (Debug)
+rem --------------------------------------------
+echo Compiling...
+call cl.exe										^
+	/nologo										^
 	/I "."										^
 	/I "./include"								^
 	/I "../floral/include"						^
@@ -20,6 +33,11 @@ cl 	/nologo										^
 	-c											^
 	src/cu/unitybuild_0.cpp
 
-lib	/nologo										^
+rem --------------------------------------------
+rem Linking
+rem --------------------------------------------
+echo Linking...
+call lib.exe									^
+	/nologo										^
 	build/obj/unitybuild_0.obj					^
 	/OUT:"./build/helich.lib"
