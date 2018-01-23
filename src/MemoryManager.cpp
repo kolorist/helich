@@ -3,7 +3,6 @@
 
 // self-provided headers
 #include "MemoryMap.h"
-#include "StackWalker.h"
 
 // 3rd-party headers
 #if defined(_WIN32)
@@ -12,8 +11,6 @@
 #endif
 
 namespace helich {
-
-	extern StackWalker							g_Walker;
 
 MemoryManager::MemoryManager()
 	: m_BaseAddress(nullptr)
@@ -34,7 +31,6 @@ const voidptr MemoryManager::AllocateGlobalMemory(voidptr baseAddress, const u32
 		MEM_COMMIT | MEM_RESERVE,
 		PAGE_READWRITE);
 #endif
-	g_Walker.LoadModules();
 	return m_BaseAddress;
 }
 

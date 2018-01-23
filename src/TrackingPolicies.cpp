@@ -1,12 +1,10 @@
 #include "TrackingPolicies.h"
-#include "StackWalker.h"
 
 // 3rd-party headers
 #include <cstring>
 
 namespace helich {
 
-	StackWalker									g_Walker;
 	FixedAllocator<PoolScheme, sizeof(DebugEntry), NoTrackingPolicy> g_TrackingAllocator;
 
 	//////////////////////////////////////////////////////////////////////////
@@ -28,7 +26,7 @@ namespace helich {
 		newEntry->SizeInBytes = nBytes;
 		newEntry->Address = dataAddr;
 		newEntry->StackTrace[0] = 0;
-		g_Walker.ShowCallstack(newEntry->StackTrace);
+		floral::get_stack_trace(newEntry->StackTrace);
 
 		// update memory header info
 		memHeader->DebugInfo = newEntry;
