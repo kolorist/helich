@@ -15,6 +15,11 @@ namespace helich {
 	class StackScheme : 
 		private detail::AllocRegion<VariableSizeAllocHeader<typename PTracking::AllocHeaderType> > 
 	{
+    public:
+        typedef typename PTracking::AllocHeaderType         TrackingHeaderType;
+        typedef VariableSizeAllocHeader<TrackingHeaderType> AllocHeaderType;
+        typedef detail::AllocRegion<AllocHeaderType>        AllocRegionType;
+
 	private:
 		typedef VariableSizeAllocHeader<typename PTracking::AllocHeaderType> AllocHeaderType;
 
@@ -38,7 +43,7 @@ namespace helich {
 		~StackScheme();
 		
 	private:
-		AllocHeaderType*						m_LastAlloc;
+		//AllocHeaderType*						m_LastAlloc;
 		s8*										m_CurrentMarker;
 		floral::mutex							m_AllocMutex;
 	};
@@ -49,6 +54,11 @@ namespace helich {
 	class PoolScheme : 
 		private detail::AllocRegion<FixedSizeAllocHeader<typename PTracking::AllocHeaderType> >
 	{
+    public:
+        typedef typename PTracking::AllocHeaderType         TrackingHeaderType;
+        typedef FixedSizeAllocHeader<TrackingHeaderType>    AllocHeaderType;
+        typedef detail::AllocRegion<AllocHeaderType>        AllocRegionType;
+
 	private:
 		typedef FixedSizeAllocHeader<typename PTracking::AllocHeaderType> AllocHeaderType;
 
@@ -65,7 +75,7 @@ namespace helich {
 		~PoolScheme();
 
 	private:
-		AllocHeaderType*						m_LastAlloc;
+		//AllocHeaderType*						m_LastAlloc;
 		AllocHeaderType*						m_NextFreeSlot;
 		u32										m_ElementSize;
 		u32										m_ElementCount;
@@ -78,6 +88,11 @@ namespace helich {
 	class FreelistScheme : 
 		private detail::AllocRegion<VariableSizeAllocHeader<typename PTracking::AllocHeaderType> >
 	{
+    public:
+        typedef typename PTracking::AllocHeaderType         TrackingHeaderType;
+        typedef VariableSizeAllocHeader<TrackingHeaderType> AllocHeaderType;
+        typedef detail::AllocRegion<AllocHeaderType>        AllocRegionType;
+
 	private: 
 		typedef VariableSizeAllocHeader<typename PTracking::AllocHeaderType> AllocHeaderType;
 
@@ -106,7 +121,7 @@ namespace helich {
 
 	private:
 		AllocHeaderType*						m_FirstFreeBlock;
-		AllocHeaderType*						m_LastAlloc;
+		//AllocHeaderType*						m_LastAlloc;
 		const u32								k_MinFrameSize;
 		floral::mutex							m_AllocMutex;
 

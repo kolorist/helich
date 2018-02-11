@@ -17,6 +17,9 @@ namespace helich {
 	class Allocator : 
 		public TAllocScheme<PTracking>
 	{
+    public:
+        typedef typename TAllocScheme<typename PTracking>         AllocSchemeType;
+
 	public:
 		Allocator();
 		~Allocator();
@@ -75,6 +78,9 @@ namespace helich {
 	class FixedAllocator :
 		public TAllocScheme<UElemSize, PTracking>
 	{
+    public:
+        typedef typename TAllocScheme<UElemSize, typename PTracking>  AllocSchemeType;
+
 	public:
 		FixedAllocator()
 		{}

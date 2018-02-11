@@ -8,6 +8,7 @@
 #include "Allocator.h"
 #include "AllocSchemes.h"
 #include "TrackingPolicies.h"
+#include "detail/AllocRegion.h"
 
 namespace helich {
 
@@ -54,7 +55,17 @@ private:
 	const bool InternalInitTracking(voidptr baseAddress, 
 		MemoryRegion<_AllocatorType> al) 
 	{
+        typedef typename _AllocatorType::AllocSchemeType SchemeType;
+        typedef typename SchemeType::AllocRegionType RegionType;
+
 		((_AllocatorType*)(al.AllocatorPtr))->MapTo(baseAddress, al.SizeInBytes, al.Name);
+
+		strcpy(pm_MemRegions[pm_MemRegionsNumber].Name, "helich/tracking");
+		pm_MemRegions[pm_MemRegionsNumber].SizeInBytes = MEMORY_TRACKING_SIZE;
+		pm_MemRegions[pm_MemRegionsNumber].BaseAddress = baseAddress;
+        pm_MemRegions[pm_MemRegionsNumber].DbgInfoExtractor = (AllocRegionDebugInfoExtractFunc)&AllocRegionDebugInfoExtractor<RegionType>::ExtractInfo;
+		pm_TotalMemInBytes += MEMORY_TRACKING_SIZE;
+		pm_MemRegionsNumber++;
 		return true;
 	}
 
@@ -63,11 +74,15 @@ private:
 	const bool InternalInit(voidptr baseAddress, 
 		MemoryRegion<_AllocatorType> al) 
 	{
+        typedef typename _AllocatorType::AllocSchemeType SchemeType;
+        typedef typename SchemeType::AllocRegionType RegionType;
+
 		((_AllocatorType*)(al.AllocatorPtr))->MapTo(baseAddress, al.SizeInBytes, al.Name);
 
 		strcpy(pm_MemRegions[pm_MemRegionsNumber].Name, al.Name);
 		pm_MemRegions[pm_MemRegionsNumber].SizeInBytes = al.SizeInBytes;
 		pm_MemRegions[pm_MemRegionsNumber].BaseAddress = baseAddress;
+        pm_MemRegions[pm_MemRegionsNumber].DbgInfoExtractor = (AllocRegionDebugInfoExtractFunc)&AllocRegionDebugInfoExtractor<RegionType>::ExtractInfo;
 		pm_TotalMemInBytes += al.SizeInBytes;
 		pm_MemRegionsNumber++;
 
@@ -75,12 +90,6 @@ private:
 		s8* nextBase = (s8*)baseAddress + al.SizeInBytes;
 		InternalInitTracking(nextBase,
 			MemoryRegion<FixedAllocator<PoolScheme, sizeof(DebugEntry), NoTrackingPolicy>> { "helich/tracking", MEMORY_TRACKING_SIZE, &g_TrackingAllocator });
-
-		strcpy(pm_MemRegions[pm_MemRegionsNumber].Name, "helich/tracking");
-		pm_MemRegions[pm_MemRegionsNumber].SizeInBytes = MEMORY_TRACKING_SIZE;
-		pm_MemRegions[pm_MemRegionsNumber].BaseAddress = nextBase;
-		pm_TotalMemInBytes += MEMORY_TRACKING_SIZE;
-		pm_MemRegionsNumber++;
 		return true;
 	}
 
@@ -90,6 +99,9 @@ private:
 		MemoryRegion<_AllocatorTypeHead> headAl, 
 		MemoryRegion<_AllocatorTypeRests> ... restAl)
 	{
+        typedef typename _AllocatorTypeHead::AllocSchemeType SchemeType;
+        typedef typename SchemeType::AllocRegionType RegionType;
+
 		// init here
 		((_AllocatorTypeHead*)(headAl.AllocatorPtr))->MapTo(baseAddress, headAl.SizeInBytes, headAl.Name);
 		s8* nextBase = (s8*)baseAddress + headAl.SizeInBytes;
@@ -97,6 +109,7 @@ private:
 		strcpy(pm_MemRegions[pm_MemRegionsNumber].Name, headAl.Name);
 		pm_MemRegions[pm_MemRegionsNumber].SizeInBytes = headAl.SizeInBytes;
 		pm_MemRegions[pm_MemRegionsNumber].BaseAddress = baseAddress;
+        pm_MemRegions[pm_MemRegionsNumber].DbgInfoExtractor = (AllocRegionDebugInfoExtractFunc)&AllocRegionDebugInfoExtractor<RegionType>::ExtractInfo;
 		pm_TotalMemInBytes += headAl.SizeInBytes;
 		pm_MemRegionsNumber++;
 

@@ -24,7 +24,7 @@ namespace helich {
 		m_BaseAddress = nullptr;
 		m_CurrentMarker = nullptr;
 		m_SizeInBytes = 0;
-		m_LastAlloc = nullptr;
+		//m_LastAlloc = nullptr;
 	}
 
 	template <class PTracking>
@@ -34,7 +34,7 @@ namespace helich {
 		m_BaseAddress = (s8*)baseAddress;
 		m_SizeInBytes = sizeInBytes;
 		m_CurrentMarker = (s8*)baseAddress;
-		m_LastAlloc = nullptr;
+		//m_LastAlloc = nullptr;
 	}
 
 	template <class PTracking>
@@ -126,7 +126,7 @@ namespace helich {
 	//////////////////////////////////////////////////////////////////////////
 	template <u32 UElemSize, class PTracking>
 	PoolScheme<UElemSize, PTracking>::PoolScheme()
-		: m_LastAlloc(nullptr)
+		: AllocRegion()//m_LastAlloc(nullptr)
 		, m_NextFreeSlot(nullptr)
 		, m_ElementSize(0)
 		, m_ElementCount(0)
@@ -237,7 +237,7 @@ namespace helich {
 		: AllocRegion()
 		, m_FirstFreeBlock(nullptr)
 		, k_MinFrameSize(sizeof(AllocHeaderType) + HL_ALIGNMENT + 1)
-		, m_LastAlloc(nullptr)
+		//, m_LastAlloc(nullptr)
 		, pm_AllocCount(0)
 		, pm_FreeCount(0)
 	{

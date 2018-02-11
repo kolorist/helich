@@ -2,6 +2,9 @@
 #define __HELICH_MEMORY_MAP_H__
 
 #include <floral.h>
+
+#include "detail/AllocRegion.h"
+
 namespace helich {
 	template <class _AllocatorType>
 	struct MemoryRegion {
@@ -17,6 +20,7 @@ namespace helich {
 		c8										Name[512];
 		u32										SizeInBytes;
 		voidptr									BaseAddress;
+        AllocRegionDebugInfoExtractFunc         DbgInfoExtractor;
 	};
 }
 
