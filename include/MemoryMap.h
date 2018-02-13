@@ -20,6 +20,7 @@ namespace helich {
 		c8										Name[512];
 		u32										SizeInBytes;
 		voidptr									BaseAddress;
+		voidptr									AllocatorPtr;
         AllocRegionDebugInfoExtractFunc         DbgInfoExtractor;
 	};
 }

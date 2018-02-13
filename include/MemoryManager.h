@@ -64,6 +64,7 @@ private:
 		pm_MemRegions[pm_MemRegionsNumber].SizeInBytes = MEMORY_TRACKING_SIZE;
 		pm_MemRegions[pm_MemRegionsNumber].BaseAddress = baseAddress;
         pm_MemRegions[pm_MemRegionsNumber].DbgInfoExtractor = (AllocRegionDebugInfoExtractFunc)&AllocRegionDebugInfoExtractor<RegionType>::ExtractInfo;
+		pm_MemRegions[pm_MemRegionsNumber].AllocatorPtr = (voidptr)al.AllocatorPtr;
 		pm_TotalMemInBytes += MEMORY_TRACKING_SIZE;
 		pm_MemRegionsNumber++;
 		return true;
@@ -83,6 +84,7 @@ private:
 		pm_MemRegions[pm_MemRegionsNumber].SizeInBytes = al.SizeInBytes;
 		pm_MemRegions[pm_MemRegionsNumber].BaseAddress = baseAddress;
         pm_MemRegions[pm_MemRegionsNumber].DbgInfoExtractor = (AllocRegionDebugInfoExtractFunc)&AllocRegionDebugInfoExtractor<RegionType>::ExtractInfo;
+		pm_MemRegions[pm_MemRegionsNumber].AllocatorPtr = (voidptr)al.AllocatorPtr;
 		pm_TotalMemInBytes += al.SizeInBytes;
 		pm_MemRegionsNumber++;
 
@@ -110,6 +112,7 @@ private:
 		pm_MemRegions[pm_MemRegionsNumber].SizeInBytes = headAl.SizeInBytes;
 		pm_MemRegions[pm_MemRegionsNumber].BaseAddress = baseAddress;
         pm_MemRegions[pm_MemRegionsNumber].DbgInfoExtractor = (AllocRegionDebugInfoExtractFunc)&AllocRegionDebugInfoExtractor<RegionType>::ExtractInfo;
+		pm_MemRegions[pm_MemRegionsNumber].AllocatorPtr = (voidptr)headAl.AllocatorPtr;
 		pm_TotalMemInBytes += headAl.SizeInBytes;
 		pm_MemRegionsNumber++;
 

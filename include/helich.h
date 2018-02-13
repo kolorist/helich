@@ -23,5 +23,6 @@
 #include <Allocator.h>
 
 #include <MemoryManager.h>
+#include <MemoryDebug.h>
 
 #endif // __HELICH_H__

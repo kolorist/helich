@@ -154,6 +154,8 @@ namespace helich {
 			s8* nextAddr = m_BaseAddress + (i + 1) * m_ElementSize;
 			AllocHeaderType* header = (AllocHeaderType*)addr;
 			header->NextAlloc = (AllocHeaderType*)nextAddr;
+			header->FrameSize = m_ElementSize;
+			header->Adjustment = 0;
 		}
 		m_NextFreeSlot = (AllocHeaderType*)m_BaseAddress;
 	}
@@ -214,6 +216,8 @@ namespace helich {
 
 		// update this slot's next free slot to next free slot
 		header->NextAlloc = m_NextFreeSlot;
+		header->FrameSize = m_ElementSize;
+		header->Adjustment = 0;
 		//*((u32*)headerAddr) = m_NextFreeIdx;
 
 		// update next free slot to this slot's index

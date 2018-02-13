@@ -20,6 +20,8 @@ namespace helich {
 	struct FixedSizeAllocHeader : TTrackingHeader {
 		FixedSizeAllocHeader*					NextAlloc;
 		FixedSizeAllocHeader*					PrevAlloc;
+		u32										FrameSize;
+		u32										Adjustment;
 	};
 
 	template <class TTrackingHeader>

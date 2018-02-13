@@ -2,7 +2,7 @@
 #define __HL_ALLOC_REGION_H__
 
 // 3rd-party headers
-#include <stdaliases.h>
+#include <floral.h>
 
 #include "MemoryDebug.h"
 
@@ -26,7 +26,7 @@ namespace detail {
 		~AllocRegion()
 		{ }
 
-	protected:
+	public:
         TAllocHeader*                           m_LastAlloc;
 		s8*										m_BaseAddress;
 		u32										m_SizeInBytes;
@@ -35,11 +35,11 @@ namespace detail {
 
 }
 
-    typedef void (*AllocRegionDebugInfoExtractFunc)(DebugMemBlock*, const u32, u32&);
+    typedef void (*AllocRegionDebugInfoExtractFunc)(voidptr, DebugMemBlock*, const u32, u32&);
 
     template <class TAllocRegion>
     struct AllocRegionDebugInfoExtractor {
-        static void                             ExtractInfo(DebugMemBlock* memBlocks, const u32 maxSize, u32& numBlocks);
+        static void                             ExtractInfo(voidptr allocRegion, DebugMemBlock* memBlocks, const u32 maxSize, u32& numBlocks);
     };
 }
 
