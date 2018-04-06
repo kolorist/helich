@@ -9,37 +9,37 @@
 namespace helich {
 namespace detail {
 
-	template <class TAllocHeader>
-	class AllocRegion {
+	template <class t_alloc_header>
+	class alloc_region {
     public:
-        typedef TAllocHeader                    AllocHeaderType;
+        typedef t_alloc_header					alloc_header_t;
 
 	public:
-		AllocRegion()
-			: m_BaseAddress(nullptr)
-			, m_SizeInBytes(0)
-			, m_UsedBytes(0)
-            , m_LastAlloc(nullptr)
+		alloc_region()
+			: p_base_address(nullptr)
+			, p_size_in_bytes(0)
+			, p_used_bytes(0)
+            , p_last_alloc(nullptr)
 		{ }
 
 	protected:
-		~AllocRegion()
+		~alloc_region()
 		{ }
 
 	public:
-        TAllocHeader*                           m_LastAlloc;
-		s8*										m_BaseAddress;
-		u32										m_SizeInBytes;
-		u32										m_UsedBytes;
+        alloc_header_t*							p_last_alloc;
+		p8										p_base_address;
+		size									p_size_in_bytes;
+		size									p_used_bytes;
 	};
 
 }
 
-    typedef void (*AllocRegionDebugInfoExtractFunc)(voidptr, DebugMemBlock*, const u32, u32&);
+    typedef void (*dbginfo_extractor_func_t)(voidptr, debug_memory_block*, const u32, u32&);
 
-    template <class TAllocRegion>
-    struct AllocRegionDebugInfoExtractor {
-        static void                             ExtractInfo(voidptr allocRegion, DebugMemBlock* memBlocks, const u32 maxSize, u32& numBlocks);
+    template <class t_alloc_region>
+    struct alloc_region_dgbinfo_extractor {
+        static void                             extract_info(voidptr i_allocRegion, debug_memory_block* i_memBlocks, const u32 i_maxSize, u32& o_numBlocks);
     };
 }
 

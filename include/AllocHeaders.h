@@ -16,28 +16,29 @@ namespace helich {
 	 *		>> Untracked
 	 */
 
-	template <class TTrackingHeader>
-	struct FixedSizeAllocHeader : TTrackingHeader {
-		FixedSizeAllocHeader*					NextAlloc;
-		FixedSizeAllocHeader*					PrevAlloc;
-		u32										FrameSize;
-		u32										Adjustment;
+	template <class t_tracking_header>
+	struct fixed_size_alloc_header : t_tracking_header {
+		fixed_size_alloc_header*				next_alloc;
+		fixed_size_alloc_header*				prev_alloc;
+		size									frame_size;
+		size									adjustment;			// cannot use u8 for arithmetic operations,
+																	// because we will have to downcast from u64 / u32 -> u8
 	};
 
-	template <class TTrackingHeader>
-	struct VariableSizeAllocHeader : TTrackingHeader {
-		VariableSizeAllocHeader*				NextAlloc;
-		VariableSizeAllocHeader*				PrevAlloc;
-		u32										FrameSize;
-		u32										Adjustment;
+	template <class t_tracking_header>
+	struct variable_size_alloc_header : t_tracking_header {
+		variable_size_alloc_header*				next_alloc;
+		variable_size_alloc_header*				prev_alloc;
+		size									frame_size;
+		size									adjustment;
 	};
 
-	struct DebugEntry;
-	struct TrackedAllocHeader {
-		DebugEntry*								DebugInfo;
+	struct debug_entry;
+	struct tracked_alloc_header {
+		debug_entry*							debug_info;
 	};
 
-	struct UntrackedAllocHeader {
+	struct untracked_alloc_header {
 	};
 }
 

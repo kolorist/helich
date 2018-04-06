@@ -11,127 +11,124 @@
 
 namespace helich {
 
-	template <class PTracking>
-	class StackScheme : 
-		private detail::AllocRegion<VariableSizeAllocHeader<typename PTracking::AllocHeaderType> > 
+	template <class t_tracking>
+	class stack_scheme : 
+		private detail::alloc_region<variable_size_alloc_header<typename t_tracking::alloc_header_t> > 
 	{
     public:
-        typedef typename PTracking::AllocHeaderType         TrackingHeaderType;
-        typedef VariableSizeAllocHeader<TrackingHeaderType> AllocHeaderType;
-        typedef detail::AllocRegion<AllocHeaderType>        AllocRegionType;
+        typedef typename t_tracking::alloc_header_t         	tracking_header_t;
+        typedef variable_size_alloc_header<tracking_header_t>	alloc_header_t;
+        typedef detail::alloc_region<alloc_header_t>        	alloc_region_t;
 
 	private:
-		typedef VariableSizeAllocHeader<typename PTracking::AllocHeaderType> AllocHeaderType;
+		typedef variable_size_alloc_header<typename t_tracking::alloc_header_t> alloc_header_t;
 
 	public:
-		StackScheme();
+		stack_scheme();
 		
-		void									MapTo(voidptr baseAddress, const u32 sizeInBytes, const_cstr name);
-		voidptr									Allocate(const u32 nBytes);
-		void									Free(voidptr pData);
+		void									map_to(voidptr i_baseAddress, const size i_sizeInBytes, const_cstr i_name);
+		voidptr									allocate(const size i_bytes);
+		void									free(voidptr i_data);
 
-		void									FreeAll();
+		void									free_all();
 
 		//////////////////////////////////////////////////////////////////////////
-		static const u32						GetRealDataSize(const u32 dataSize)				{ return (dataSize + HL_ALIGNMENT + sizeof(AllocHeaderType)); }
+		static const size						get_real_data_size(const size i_dataSize)				{ return (i_dataSize + HL_ALIGNMENT + sizeof(alloc_header_t)); }
 
 		// NOTE: the destructor of policy class should be protected to prevent any attempts to delete
 		// the host class by using pointers to its derived class (which is the policy class here)
 		// When delete the host class by its original pointers, the destructors are called correctly in
 		// both derived class and base class
 	protected:
-		~StackScheme();
+		~stack_scheme();
 		
 	private:
-		//AllocHeaderType*						m_LastAlloc;
-		s8*										m_CurrentMarker;
-		floral::mutex							m_AllocMutex;
+		p8										m_current_marker;
+		floral::mutex							m_alloc_mutex;
 	};
 
 	//////////////////////////////////////////////////////////////////////////
 
-	template <u32 UElemSize, class PTracking>
-	class PoolScheme : 
-		private detail::AllocRegion<FixedSizeAllocHeader<typename PTracking::AllocHeaderType> >
+	template <u32 t_elem_size, class t_tracking>
+	class pool_scheme : 
+		private detail::alloc_region<fixed_size_alloc_header<typename t_tracking::alloc_header_t> >
 	{
     public:
-        typedef typename PTracking::AllocHeaderType         TrackingHeaderType;
-        typedef FixedSizeAllocHeader<TrackingHeaderType>    AllocHeaderType;
-        typedef detail::AllocRegion<AllocHeaderType>        AllocRegionType;
+        typedef typename t_tracking::alloc_header_t				tracking_header_t;
+        typedef fixed_size_alloc_header<tracking_header_t>		alloc_header_t;
+        typedef detail::alloc_region<alloc_header_t>			alloc_region_t;
 
 	private:
-		typedef FixedSizeAllocHeader<typename PTracking::AllocHeaderType> AllocHeaderType;
+		typedef fixed_size_alloc_header<typename t_tracking::alloc_header_t>	alloc_header_t;
 
 	public:
-		PoolScheme();
+		pool_scheme();
 
-		void									MapTo(voidptr baseAddress, const u32 sizeInBytes, const_cstr name);
-		voidptr									Allocate();
-		void									Free(voidptr pData);
+		void									map_to(voidptr i_baseAddress, const size i_sizeInBytes, const_cstr i_name);
+		voidptr									allocate();
+		void									free(voidptr i_data);
 
-		void									FreeAll();
+		void									free_all();
 
 	protected:
-		~PoolScheme();
+		~pool_scheme();
 
 	private:
-		//AllocHeaderType*						m_LastAlloc;
-		AllocHeaderType*						m_NextFreeSlot;
-		u32										m_ElementSize;
-		u32										m_ElementCount;
-		floral::mutex							m_AllocMutex;
+		alloc_header_t*							m_next_free_slot;
+		u32										m_element_size;
+		u32										m_element_count;
+		floral::mutex							m_alloc_mutex;
 	};
 
 	//////////////////////////////////////////////////////////////////////////
 
-	template <class PTracking>
-	class FreelistScheme : 
-		private detail::AllocRegion<VariableSizeAllocHeader<typename PTracking::AllocHeaderType> >
+	template <class t_tracking>
+	class freelist_scheme : 
+		private detail::alloc_region<variable_size_alloc_header<typename t_tracking::alloc_header_t> >
 	{
     public:
-        typedef typename PTracking::AllocHeaderType         TrackingHeaderType;
-        typedef VariableSizeAllocHeader<TrackingHeaderType> AllocHeaderType;
-        typedef detail::AllocRegion<AllocHeaderType>        AllocRegionType;
+        typedef typename t_tracking::alloc_header_t				tracking_header_t;
+        typedef variable_size_alloc_header<tracking_header_t>	alloc_header_t;
+        typedef detail::alloc_region<alloc_header_t>			alloc_region_t;
 
 	private: 
-		typedef VariableSizeAllocHeader<typename PTracking::AllocHeaderType> AllocHeaderType;
+		typedef variable_size_alloc_header<typename t_tracking::alloc_header_t> alloc_header_t;
 
 	public:
-		FreelistScheme();
+		freelist_scheme();
 
-		void									MapTo(voidptr baseAddress, const u32 sizeInBytes, const_cstr name);
-		voidptr									Allocate(const u32 nBytes);
-		void									Free(voidptr pData);
+		void									map_to(voidptr i_baseAddress, const size i_sizeInBytes, const_cstr i_name);
+		voidptr									allocate(const size i_bytes);
+		void									free(voidptr i_data);
 
-		void									FreeAll();
+		void									free_all();
 
 		//////////////////////////////////////////////////////////////////////////
-		static const u32						GetRealDataSize(const u32 dataSize)				{ return (dataSize + HL_ALIGNMENT + sizeof(AllocHeaderType)); }
+		static const size						get_real_data_size(const size i_dataSize)				{ return (i_dataSize + HL_ALIGNMENT + sizeof(alloc_header_t)); }
 
 	private:
-		static inline const bool				CanFit(AllocHeaderType* header, const u32 nBytes);
-		static inline const bool				CanCreateNewBlock(AllocHeaderType* header, const u32 nBytes, const u32 minFrameSize);
+		static inline const bool				can_fit(alloc_header_t* i_header, const size i_bytes);
+		static inline const bool				can_create_new_block(alloc_header_t* i_header, const size i_bytes, const size i_minFrameSize);
 
-		static void								FreeBlock(AllocHeaderType* block, AllocHeaderType* prevFree, AllocHeaderType* nextFree);
-		static const bool						JoinBlocks(AllocHeaderType* leftBlock, AllocHeaderType* rightBlock);
-		static const bool						CanJoin(AllocHeaderType* leftBlock, AllocHeaderType* rightBlock);
+		static void								free_block(alloc_header_t* i_block, alloc_header_t* i_prevFree, alloc_header_t* i_nextFree);
+		static const bool						join_blocks(alloc_header_t* i_leftBlock, alloc_header_t* i_rightBlock);
+		static const bool						can_join(alloc_header_t* i_leftBlock, alloc_header_t* i_rightBlock);
 
 	protected:
-		~FreelistScheme();
+		~freelist_scheme();
 
 	private:
-		AllocHeaderType*						m_FirstFreeBlock;
-		//AllocHeaderType*						m_LastAlloc;
-		const u32								k_MinFrameSize;
-		floral::mutex							m_AllocMutex;
+		const size								k_min_frame_size;
+		alloc_header_t*							m_first_free_block;
+		floral::mutex							m_alloc_mutex;
 
 	public:
-		const s8*								GetBaseAddress() const 							{ return m_BaseAddress; }
-		const u32								GetSizeInBytes() const							{ return m_SizeInBytes; }
-		const u32								GetUsedBytes() const							{ return m_UsedBytes; }
+		const p8								get_base_address() const 						{ return p_base_address; }
+		const size								get_size_in_bytse() const						{ return p_size_in_bytes; }
+		const size								get_used_bytes() const							{ return p_used_bytes; }
 
-		u32										pm_AllocCount;
-		u32										pm_FreeCount;
+		u32										p_alloc_count;
+		u32										p_free_count;
 	};
 
 }

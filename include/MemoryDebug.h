@@ -4,10 +4,10 @@
 #include <stdaliases.h>
 
 namespace helich {
-    struct DebugMemBlock {
-        s8*                                     pm_FrameAddress;
-        u32                                     pm_FrameSize;
-        bool                                    pm_IsAllocated;
+    struct debug_memory_block {
+        p8										frame_address;
+        size                                    frame_size;
+        bool                                    is_allocated;
     };
 }
 

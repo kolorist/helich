@@ -6,22 +6,22 @@
 #include "detail/AllocRegion.h"
 
 namespace helich {
-	template <class _AllocatorType>
-	struct MemoryRegion {
-		typedef _AllocatorType*					AllocatorPtrType;
+	template <class t_allocator_type>
+	struct memory_region {
+		typedef t_allocator_type*				allocator_ptr_t;
 
-		const_cstr								Name;
-		u32										SizeInBytes;
+		const_cstr								name;
+		size									size_in_bytes;
 
-		AllocatorPtrType						AllocatorPtr;
+		allocator_ptr_t							allocator_ptr;
 	};
 
-	struct MemoryRegionInfo {
-		c8										Name[512];
-		u32										SizeInBytes;
-		voidptr									BaseAddress;
-		voidptr									AllocatorPtr;
-        AllocRegionDebugInfoExtractFunc         DbgInfoExtractor;
+	struct memory_region_info {
+		c8										name[512];
+		size									size_in_bytes;
+		voidptr									base_address;
+		voidptr									allocator_ptr;
+        alloc_region_dgbinfo_extractor			dbg_info_extractor;
 	};
 }
 
