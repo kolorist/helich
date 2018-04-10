@@ -49,7 +49,7 @@ namespace helich {
 
 	//////////////////////////////////////////////////////////////////////////
 
-	template <u32 t_elem_size, class t_tracking>
+	template <size t_elem_size, class t_tracking>
 	class pool_scheme : 
 		private detail::alloc_region<fixed_size_alloc_header<typename t_tracking::alloc_header_t> >
 	{
@@ -75,7 +75,7 @@ namespace helich {
 
 	private:
 		alloc_header_t*							m_next_free_slot;
-		u32										m_element_size;
+		size									m_element_size;
 		u32										m_element_count;
 		floral::mutex							m_alloc_mutex;
 	};
@@ -91,7 +91,7 @@ namespace helich {
         typedef variable_size_alloc_header<tracking_header_t>	alloc_header_t;
         typedef detail::alloc_region<alloc_header_t>			alloc_region_t;
 
-	private: 
+	private:
 		typedef variable_size_alloc_header<typename t_tracking::alloc_header_t> alloc_header_t;
 
 	public:

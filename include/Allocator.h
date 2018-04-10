@@ -13,84 +13,84 @@ namespace helich {
 	// we must use: template<typename> class Foo
 	// instead of: template<typename> typename Foo
 	// however, since C++17 (and VS2015) we can use them interchangeable in this case
-	template <template<typename> class TAllocScheme, class PTracking = DefaultTrackingPolicy>
-	class Allocator : 
-		public TAllocScheme<PTracking>
+	template <template<typename> class t_alloc_scheme, class t_tracking_policy = default_tracking_policy>
+	class allocator :
+		public t_alloc_scheme<t_tracking_policy>
 	{
     public:
-        typedef typename TAllocScheme<typename PTracking>         AllocSchemeType;
+        typedef typename t_alloc_scheme<typename t_tracking_policy>         alloc_scheme_t;
 
 	public:
-		Allocator();
-		~Allocator();
+		allocator();
+		~allocator();
 
-		template <class TObjectType>
-		static const u32 GetRealDataSize() {
-			return TAllocScheme<PTracking>::GetRealDataSize(sizeof(TObjectType));
+		template <class t_object_type>
+		static const size get_real_data_size() {
+			return t_alloc_scheme<t_tracking_policy>::get_real_data_size(sizeof(t_object_type));
 		}
 
-		static const u32 GetRealDataSize(const u32 rawDataSize) {
-			return TAllocScheme<PTracking>::GetRealDataSize(rawDataSize);
+		static const size get_real_data_size(const size i_rawDataSize) {
+			return t_alloc_scheme<t_tracking_policy>::get_real_data_size(i_rawDataSize);
 		}
 
-		template <class TObjectType>
-		static const u32 GetClosureSize(const u32 dataSize) {
-			return (dataSize + sizeof(TObjectType) + HL_ALIGNMENT);
+		template <class t_object_type>
+		static const size get_closure_size(const size i_dataSize) {
+			return (dataSize + sizeof(t_object_type) + HL_ALIGNMENT);
 		}
 
-		template <class TObjectType, class TClosureAllocator, class ... TParams>
-		TObjectType* AllocateClosure(const u32 nBytes, TParams... params) {
-			voidptr addr = TAllocScheme<PTracking>::Allocate(nBytes + sizeof(TObjectType) + HL_ALIGNMENT);
-			TObjectType* obj = new (addr) TObjectType(params...);
-			voidptr baseClsAddress = alignAddress((s8*)addr + sizeof(TObjectType));
-			((TClosureAllocator*)obj)->MapTo(baseClsAddress, nBytes, "");
+		template <class t_object_type, class t_closure_allocator, class ... t_params>
+		t_object_type* allocate_closure(const size i_bytes, t_params... i_params) {
+			voidptr addr = t_alloc_scheme<t_tracking_policy>::allocate(i_bytes + sizeof(t_object_type) + HL_ALIGNMENT);
+			t_object_type* obj = new (addr) t_object_type(i_params...);
+			voidptr baseClsAddress = align_address((s8*)addr + sizeof(t_object_type));
+			((t_closure_allocator*)obj)->map_tp(baseClsAddress, i_bytes, "");
 			return obj;
 		}
 
-		template <class TClosureAllocator>
-		TClosureAllocator* AllocateArena(const u32 nBytes) {
-			voidptr addr = TAllocScheme<PTracking>::Allocate(nBytes + sizeof(TClosureAllocator) + HL_ALIGNMENT);
-			TClosureAllocator* cls = new (addr) TClosureAllocator();
-			voidptr baseClsAddress = alignAddress((s8*)addr + sizeof(TClosureAllocator));
-			cls->MapTo(baseClsAddress, nBytes, "arena");
+		template <class t_closure_allocator>
+		t_closure_allocator* allocate_arena(const size i_bytes) {
+			voidptr addr = t_alloc_scheme<t_tracking_policy>::allocate(i_bytes + sizeof(t_closure_allocator) + HL_ALIGNMENT);
+			t_closure_allocator* cls = new (addr) t_closure_allocator();
+			voidptr baseClsAddress = align_address((s8*)addr + sizeof(t_closure_allocator));
+			cls->map_to(baseClsAddress, i_bytes, "arena");
 			return cls;
 		}
 
-		voidptr Allocate(const u32 nBytes) {
-			return TAllocScheme<PTracking>::Allocate(nBytes);
+		voidptr allocate(const size i_bytes) {
+			return t_alloc_scheme<t_tracking_policy>::allocate(i_bytes);
 		}
 
-		template <class TObjectType, class ... TParams>
-		TObjectType* Allocate(TParams... params) {
-			voidptr addr = TAllocScheme<PTracking>::Allocate(sizeof(TObjectType));
-			return new (addr) TObjectType(params...);
+		template <class t_object_type, class ... t_params>
+		t_object_type* allocate(t_params... i_params) {
+			voidptr addr = t_alloc_scheme<t_tracking_policy>::allocate(sizeof(t_object_type));
+			return new (addr) t_object_type(i_params...);
 		}
 
-		template <class TObjectType>
-		TObjectType* AllocateArray(const u32 elemCount) {
-			voidptr addr = TAllocScheme<PTracking>::Allocate(sizeof(TObjectType) * elemCount);
-			return new (addr) TObjectType[elemCount];
+		template <class t_object_type>
+		t_object_type* allocateArray(const u32 i_elemCount) {
+			voidptr addr = t_alloc_scheme<t_tracking_policy>::allocate(sizeof(t_object_type) * i_elemCount);
+			return new (addr) t_object_type[i_elemCount];
 		}
 	};
 
 	//////////////////////////////////////////////////////////////////////////
-	template <template<u32, typename> class TAllocScheme, u32 UElemSize, class PTracking = DefaultTrackingPolicy>
-	class FixedAllocator :
-		public TAllocScheme<UElemSize, PTracking>
+	template <template<size, typename> class t_alloc_scheme, size t_elem_size, class t_tracking_policy = default_tracking_policy>
+	class fixed_allocator :
+		public t_alloc_scheme<t_elem_size, t_tracking_policy>
 	{
     public:
-        typedef typename TAllocScheme<UElemSize, typename PTracking>  AllocSchemeType;
+        typedef typename t_alloc_scheme<t_elem_size, typename t_tracking_policy>  alloc_scheme_t;
 
 	public:
-		FixedAllocator()
+		fixed_allocator()
 		{}
-		~FixedAllocator()
+		~fixed_allocator()
 		{}
 
-		template <class TObjectType, class ... TParams>
-		TObjectType* Allocate(TParams... params) {
-			voidptr addr = TAllocScheme<UElemSize, PTracking>::Allocate();
-			return new (addr) TObjectType(params...);
+		template <class t_object_type, class ... t_params>
+		t_object_type* allocate(t_params... i_params) {
+			voidptr addr = t_alloc_scheme<t_elem_size, t_tracking_policy>::allocate();
+			return new (addr) t_object_type(i_params...);
 		}
 	};
 }

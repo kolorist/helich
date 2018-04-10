@@ -27,16 +27,16 @@ namespace helich {
 	}
 
 	template <class t_tracking>
-	void stack_scheme<t_tracking>::MapTo(voidptr i_baseAddress, const size i_sizeInBytes, const_cstr i_name)
+	void stack_scheme<t_tracking>::map_to(voidptr i_baseAddress, const size i_sizeInBytes, const_cstr i_name)
 	{
 		floral::lock_guard memGuard(m_alloc_mutex);
-		p_base_address = (s8*)i_baseAddress;
+		p_base_address = (p8)i_baseAddress;
 		p_size_in_bytes = i_sizeInBytes;
-		m_current_marker = (s8*)i_baseAddress;
+		m_current_marker = (p8)i_baseAddress;
 	}
 
 	template <class t_tracking>
-	voidptr stack_scheme<t_tracking>::Allocate(const size i_bytes)
+	voidptr stack_scheme<t_tracking>::allocate(const size i_bytes)
 	{
 		floral::lock_guard memGuard(m_alloc_mutex);
 		// the whole stack frame size, count all headers, displacement, data, ...
@@ -47,23 +47,23 @@ namespace helich {
 		// [A'..A']: not-free region but contains nothing   : >= 0 bytes
 		// sizeof([A..A]) + sizeof([A'..A']) == HL_ALIGNMENT
 		// stack header's ([H..H]) size always equals to HL_ALIGNMENT (min = 4 bytes)
-		u32 frameSize = i_bytes + HL_ALIGNMENT + sizeof(alloc_header_t);
+		size frame_size = i_bytes + HL_ALIGNMENT + sizeof(alloc_header_t);
 		// out of memory check
-		assert((u32)m_current_marker + frameSize <= (u32)p_base_address + p_size_in_bytes);
+		assert((aptr)m_current_marker + frame_size <= (aptr)p_base_address + p_size_in_bytes);
 		// start address of the frame
-		s8* orgAddr = m_current_marker;
+		p8 orgAddr = m_current_marker;
 
-		s8* headerAddr = (s8*)alignAddress(orgAddr);    // forward align, this is address of the header
-		s8* dataAddr = headerAddr + sizeof(alloc_header_t);       // sure-align address, this is the start of the data
+		p8 headerAddr = (p8)align_address(orgAddr);    // forward align, this is address of the header
+		p8 dataAddr = headerAddr + sizeof(alloc_header_t);       // sure-align address, this is the start of the data
 		// reset data memory region
 		memset(dataAddr, 0, i_bytes);
 
 		// save info about displacement and allocated frame size
-		u32 displacement = (u32)headerAddr - (u32)orgAddr;
+		size displacement = (aptr)headerAddr - (aptr)orgAddr;
 		alloc_header_t* header = (alloc_header_t*)headerAddr;
 		header->next_alloc = nullptr;
 		header->prev_alloc = p_last_alloc;
-		header->frame_size = frameSize;
+		header->frame_size = frame_size;
 		header->adjustment = displacement;
 		if (p_last_alloc != nullptr) {
 			p_last_alloc->next_alloc = header;
@@ -72,7 +72,7 @@ namespace helich {
 		p_last_alloc = header;
 
 		// increase marker
-		m_current_marker += frameSize;
+		m_current_marker += frame_size;
 
 		// register allocation
 		t_tracking::register(header, i_bytes, "no-desc", __FILE__, __LINE__);
@@ -87,12 +87,12 @@ namespace helich {
 		// get the header position
 		alloc_header_t* header = (alloc_header_t*)i_data - 1;
 		// now, we can get the frame size
-		u32 frameSize = header->frame_size;
-		u32 displacement = header->adjustment;
+		size frame_size = header->frame_size;
+		size displacement = header->adjustment;
 
 		// validate deallocation
-		s8* orgAddr = (s8*)header - displacement;
-		s8* lastAllocAddr = m_current_marker - frameSize;
+		p8 orgAddr = (p8)header - displacement;
+		p8 lastAllocAddr = m_current_marker - frame_size;
 
 		assert(orgAddr == lastAllocAddr && "Invalid free: not in allocation order");
 
@@ -106,9 +106,9 @@ namespace helich {
 		p_last_alloc = header->prev_alloc;
 
 		// reset memory region
-		memset(orgAddr, 0, frameSize);
+		memset(orgAddr, 0, frame_size);
 		// done validation, free memory
-		m_current_marker -= frameSize;
+		m_current_marker -= frame_size;
 	}
 
 	template <class t_tracking>
@@ -122,9 +122,9 @@ namespace helich {
 	//////////////////////////////////////////////////////////////////////////
 	// Pooling Allocation Scheme
 	//////////////////////////////////////////////////////////////////////////
-	template <u32 t_elem_size, class t_tracking>
+	template <size t_elem_size, class t_tracking>
 	pool_scheme<t_elem_size, t_tracking>::pool_scheme()
-		: alloc_region()//m_LastAlloc(nullptr)
+		: alloc_region()//p_last_alloc(nullptr)
 		, m_next_free_slot(nullptr)
 		, m_element_size(0)
 		, m_element_count(0)
@@ -132,89 +132,89 @@ namespace helich {
 
 	}
 
-	template <u32 t_elem_size, class t_tracking>
+	template <size t_elem_size, class t_tracking>
 	pool_scheme<t_elem_size, t_tracking>::~pool_scheme()
 	{
 
 	}
 
-	template <u32 t_elem_size, class t_tracking>
-	void pool_scheme<t_elem_size, t_tracking>::MapTo(voidptr baseAddress, const u32 sizeInBytes, const_cstr name)
+	template <size t_elem_size, class t_tracking>
+	void pool_scheme<t_elem_size, t_tracking>::map_to(voidptr i_baseAddress, const size i_sizeInBytes, const_cstr i_name)
 	{
-		floral::lock_guard memGuard(m_AllocMutex);
-		m_element_size = ((t_elem_size - 1) / HL_ALIGNMENT + 1) * HL_ALIGNMENT + sizeof(AllocHeaderType);
-		m_element_count = sizeInBytes / m_element_size;
-		m_BaseAddress = (s8*)baseAddress;
-		m_SizeInBytes = sizeInBytes;
+		floral::lock_guard memGuard(m_alloc_mutex);
+		m_element_size = ((t_elem_size - 1) / HL_ALIGNMENT + 1) * HL_ALIGNMENT + sizeof(alloc_header_t);
+		m_element_count = (u32)(i_sizeInBytes / m_element_size);
+		p_base_address = (p8)i_baseAddress;
+		p_size_in_bytes = i_sizeInBytes;
 		// fill the assoc list
 		for (u32 i = 0; i < m_element_count - 1; i++) {
-			s8* addr = m_BaseAddress + i * m_element_size;
-			s8* nextAddr = m_BaseAddress + (i + 1) * m_element_size;
-			AllocHeaderType* header = (AllocHeaderType*)addr;
-			header->NextAlloc = (AllocHeaderType*)nextAddr;
-			header->FrameSize = m_element_size;
-			header->Adjustment = 0;
+			p8 addr = p_base_address + i * m_element_size;
+			p8 nextAddr = p_base_address + (i + 1) * m_element_size;
+			alloc_header_t* header = (alloc_header_t*)addr;
+			header->next_alloc = (alloc_header_t*)nextAddr;
+			header->frame_size = m_element_size;
+			header->adjustment = 0;
 		}
-		m_next_free_slot = (AllocHeaderType*)m_BaseAddress;
+		m_next_free_slot = (alloc_header_t*)p_base_address;
 	}
 
-	template <u32 t_elem_size, class t_tracking>
-	voidptr pool_scheme<t_elem_size, t_tracking>::Allocate()
+	template <size t_elem_size, class t_tracking>
+	voidptr pool_scheme<t_elem_size, t_tracking>::allocate()
 	{
-		floral::lock_guard memGuard(m_AllocMutex);
+		floral::lock_guard memGuard(m_alloc_mutex);
 		// TODO: out of memory assertion
 
 		// we have return address right-away, the memory region was pre-aligned already
-		//s8* headerAddr = (s8*)((u32)m_BaseAddress + (u32)m_next_free_slot);
-		s8* headerAddr = (s8*)m_next_free_slot;
-		s8* dataAddr = headerAddr + sizeof(AllocHeaderType);
+		//p8 headerAddr = (p8)((aptr)p_base_address + (aptr)m_next_free_slot);
+		p8 headerAddr = (p8)m_next_free_slot;
+		p8 dataAddr = headerAddr + sizeof(alloc_header_t);
 		// next free slot is contained inside pooled element, update it by them
 		// update header and next free slot
-		AllocHeaderType* header = (AllocHeaderType*)headerAddr;
-		m_next_free_slot = header->NextAlloc;
-		header->NextAlloc = nullptr;
-		header->PrevAlloc = m_LastAlloc;
-		if (m_LastAlloc != nullptr) {
-			m_LastAlloc->NextAlloc = header;
+		alloc_header_t* header = (alloc_header_t*)headerAddr;
+		m_next_free_slot = header->next_alloc;
+		header->next_alloc = nullptr;
+		header->prev_alloc = p_last_alloc;
+		if (p_last_alloc != nullptr) {
+			p_last_alloc->next_alloc = header;
 		}
 
-		t_tracking::Register(headerAddr, m_element_size, "no-desc", __FILE__, __LINE__);
+		t_tracking::register_allocation(headerAddr, m_element_size, "no-desc", __FILE__, __LINE__);
 
-		m_LastAlloc = header;
+		p_last_alloc = header;
 		// reset memory region
 		memset(dataAddr, 0, t_elem_size);
 
 		return dataAddr;
 	}
 
-	template <u32 t_elem_size, class t_tracking>
-	void pool_scheme<t_elem_size, t_tracking>::Free(voidptr pData)
+	template <size t_elem_size, class t_tracking>
+	void pool_scheme<t_elem_size, t_tracking>::free(voidptr pData)
 	{
-		floral::lock_guard memGuard(m_AllocMutex);
+		floral::lock_guard memGuard(m_alloc_mutex);
 		// calculate position of the will-be-freed slot
-		AllocHeaderType* header = (AllocHeaderType*)((s8*)pData - sizeof(AllocHeaderType));
+		alloc_header_t* header = (alloc_header_t*)((p8)pData - sizeof(alloc_header_t));
 
 		// unregister tracking info
-		t_tracking::Unregister(header);
+		t_tracking::unregister_allocation(header);
 
-		if (header->NextAlloc) {
-			header->NextAlloc->PrevAlloc = header->PrevAlloc;
+		if (header->next_alloc) {
+			header->next_alloc->prev_alloc = header->prev_alloc;
 		}
-		if (header->PrevAlloc) {
-			header->PrevAlloc->NextAlloc = header->NextAlloc;
+		if (header->prev_alloc) {
+			header->prev_alloc->next_alloc = header->next_alloc;
 		}
 		// are we freeing the last allocation?
-		if (header == m_LastAlloc) {
+		if (header == p_last_alloc) {
 			// yes, then update the list's tail element
-			m_LastAlloc = header->PrevAlloc;
+			p_last_alloc = header->prev_alloc;
 		}
 
 		memset(header, 0, m_element_size);
 
 		// update this slot's next free slot to next free slot
-		header->NextAlloc = m_next_free_slot;
-		header->FrameSize = m_element_size;
-		header->Adjustment = 0;
+		header->next_alloc = m_next_free_slot;
+		header->frame_size = m_element_size;
+		header->adjustment = 0;
 		//*((u32*)headerAddr) = m_NextFreeIdx;
 
 		// update next free slot to this slot's index
@@ -222,10 +222,10 @@ namespace helich {
 		m_next_free_slot = header;
 	}
 
-	template <u32 t_elem_size, class t_tracking>
-	void pool_scheme<t_elem_size, t_tracking>::FreeAll()
+	template <size t_elem_size, class t_tracking>
+	void pool_scheme<t_elem_size, t_tracking>::free_all()
 	{
-		floral::lock_guard memGuard(m_AllocMutex);
+		floral::lock_guard memGuard(m_alloc_mutex);
 		// TODO
 	}
 
@@ -234,130 +234,130 @@ namespace helich {
 	// Freelist Allocation Scheme
 	//////////////////////////////////////////////////////////////////////////
 	template <class t_tracking>
-	FreelistScheme<t_tracking>::FreelistScheme()
+	freelist_scheme<t_tracking>::freelist_scheme()
 		: alloc_region()
-		, m_FirstFreeBlock(nullptr)
-		, k_MinFrameSize(sizeof(AllocHeaderType) + HL_ALIGNMENT + 1)
-		//, m_LastAlloc(nullptr)
-		, pm_AllocCount(0)
-		, pm_FreeCount(0)
+		, m_first_free_block(nullptr)
+		, k_min_frame_size(sizeof(alloc_header_t) + HL_ALIGNMENT + 1)
+		//, p_last_alloc(nullptr)
+		, p_alloc_count(0)
+		, p_free_count(0)
 	{
 
 	}
 
 	template <class t_tracking>
-	FreelistScheme<t_tracking>::~FreelistScheme()
+	freelist_scheme<t_tracking>::~freelist_scheme()
 	{
 
 	}
 
 	template <class t_tracking>
-	void FreelistScheme<t_tracking>::MapTo(voidptr baseAddress, const u32 sizeInBytes, const_cstr name)
+	void freelist_scheme<t_tracking>::map_to(voidptr i_baseAddress, const size i_sizeInBytes, const_cstr i_name)
 	{
-		floral::lock_guard memGuard(m_AllocMutex);
-		m_BaseAddress = (s8*)baseAddress;
-		m_SizeInBytes = sizeInBytes;
+		floral::lock_guard memGuard(m_alloc_mutex);
+		p_base_address = (p8)i_baseAddress;
+		p_size_in_bytes = i_sizeInBytes;
 
-		m_FirstFreeBlock = (AllocHeaderType*)m_BaseAddress;
-		m_FirstFreeBlock->FrameSize = m_SizeInBytes;
-		m_FirstFreeBlock->Adjustment = 0;
-		m_FirstFreeBlock->NextAlloc = nullptr;
-		m_FirstFreeBlock->PrevAlloc = nullptr;
+		m_first_free_block = (alloc_header_t*)p_base_address;
+		m_first_free_block->frame_size = p_size_in_bytes;
+		m_first_free_block->adjustment = 0;
+		m_first_free_block->next_alloc = nullptr;
+		m_first_free_block->prev_alloc = nullptr;
 	}
 
 	// inline services for allocation
 	template <class t_tracking>
-	const bool FreelistScheme<t_tracking>::CanFit(AllocHeaderType* header, const u32 nBytes)
+	const bool freelist_scheme<t_tracking>::can_fit(alloc_header_t* header, const size nBytes)
 	{
-		return (header->FrameSize - HL_ALIGNMENT - sizeof(AllocHeaderType) >= nBytes);
+		return (header->frame_size - HL_ALIGNMENT - sizeof(alloc_header_t) >= nBytes);
 	}
 
 	template <class t_tracking>
-	const bool FreelistScheme<t_tracking>::CanCreateNewBlock(AllocHeaderType* header, const u32 nBytes, const u32 minFrameSize)
+	const bool freelist_scheme<t_tracking>::can_create_new_block(alloc_header_t* header, const size nBytes, const size minFrameSize)
 	{
-		u32 remaining = header->FrameSize - HL_ALIGNMENT - sizeof(AllocHeaderType) - nBytes;
+		size remaining = header->frame_size - HL_ALIGNMENT - sizeof(alloc_header_t) - nBytes;
 		return (remaining >= minFrameSize);
 	}
 
 	template <class t_tracking>
-	voidptr FreelistScheme<t_tracking>::Allocate(const u32 nBytes)
+	voidptr freelist_scheme<t_tracking>::allocate(const size nBytes)
 	{
-		floral::lock_guard memGuard(m_AllocMutex);
+		floral::lock_guard memGuard(m_alloc_mutex);
 		// first-fit strategy
-		AllocHeaderType* currBlock = m_FirstFreeBlock;
+		alloc_header_t* currBlock = m_first_free_block;
 		// search
-		while (currBlock && !CanFit(currBlock, nBytes)) {
-			currBlock = currBlock->NextAlloc;
+		while (currBlock && !can_fit(currBlock, nBytes)) {
+			currBlock = currBlock->next_alloc;
 		}
 
 		if (currBlock) { // found it!
-			voidptr dataAddr = (s8*)currBlock + sizeof(AllocHeaderType);
+			voidptr dataAddr = (p8)currBlock + sizeof(alloc_header_t);
 			// C1: a new free block needs to be created
-			if (CanCreateNewBlock(currBlock, nBytes, k_MinFrameSize)) {
-				u32 oldFrameSize = currBlock->FrameSize;
-				// update frameSize of currBlock
-				u32 currFrameSize = sizeof(AllocHeaderType) + nBytes + HL_ALIGNMENT;
-				u8 disp = currBlock->Adjustment;
-				currBlock->FrameSize = currFrameSize;
+			if (can_create_new_block(currBlock, nBytes, k_min_frame_size)) {
+				size oldFrameSize = currBlock->frame_size;
+				// update frame_size of currBlock
+				size currFrameSize = sizeof(alloc_header_t) + nBytes + HL_ALIGNMENT;
+				size disp = currBlock->adjustment;
+				currBlock->frame_size = currFrameSize;
 
 				// create new free block
-				s8* unalignedNBStart = (s8*)currBlock - disp + currBlock->FrameSize;
-				//s8* unalignedNBStart = (s8*)currBlock + currBlock->FrameSize;
-				s8* nbStart = (s8*)alignAddress(unalignedNBStart);
-				u32 nbDisp = (u32)nbStart - (u32)unalignedNBStart;
-				u32 nbFrameSize = oldFrameSize - currFrameSize;
-				AllocHeaderType* newBlock = (AllocHeaderType*)nbStart;
+				p8 unalignedNBStart = (p8)currBlock - disp + currBlock->frame_size;
+				//p8 unalignedNBStart = (p8)currBlock + currBlock->frame_size;
+				p8 nbStart = (p8)align_address(unalignedNBStart);
+				aptr nbDisp = (aptr)nbStart - (aptr)unalignedNBStart;
+				size nbFrameSize = oldFrameSize - currFrameSize;
+				alloc_header_t* newBlock = (alloc_header_t*)nbStart;
 				// update pointers of new free block
-				newBlock->NextAlloc = currBlock->NextAlloc;
-				newBlock->PrevAlloc = currBlock->PrevAlloc;
+				newBlock->next_alloc = currBlock->next_alloc;
+				newBlock->prev_alloc = currBlock->prev_alloc;
 				//newBlock->TrackingInfo = nullptr;
-				newBlock->FrameSize = nbFrameSize;
-				newBlock->Adjustment = nbDisp;
+				newBlock->frame_size = nbFrameSize;
+				newBlock->adjustment = nbDisp;
 
 				// delete pointers on currBlock as it's already occupied
-				currBlock->NextAlloc = nullptr;
-				currBlock->PrevAlloc = nullptr;
+				currBlock->next_alloc = nullptr;
+				currBlock->prev_alloc = nullptr;
 
 				// update linked list
-				if (newBlock->PrevAlloc) {
-					newBlock->PrevAlloc->NextAlloc = newBlock;
+				if (newBlock->prev_alloc) {
+					newBlock->prev_alloc->next_alloc = newBlock;
 				}
-				if (newBlock->NextAlloc) {
-					newBlock->NextAlloc->PrevAlloc = newBlock;
+				if (newBlock->next_alloc) {
+					newBlock->next_alloc->prev_alloc = newBlock;
 				}
 
 				// update first free block
-				if (currBlock == m_FirstFreeBlock) {
-					m_FirstFreeBlock = newBlock;
+				if (currBlock == m_first_free_block) {
+					m_first_free_block = newBlock;
 				}
 			}
 			else {
 				// C2: we can use all of this block
-				if (currBlock->PrevAlloc) {
-					currBlock->PrevAlloc->NextAlloc = currBlock->NextAlloc;
+				if (currBlock->prev_alloc) {
+					currBlock->prev_alloc->next_alloc = currBlock->next_alloc;
 				}
-				if (currBlock->NextAlloc) {
-					currBlock->NextAlloc->PrevAlloc = currBlock->PrevAlloc;
+				if (currBlock->next_alloc) {
+					currBlock->next_alloc->prev_alloc = currBlock->prev_alloc;
 				}
 				// update first free block?
-				if (m_FirstFreeBlock == currBlock) {
-					m_FirstFreeBlock = currBlock->NextAlloc;
+				if (m_first_free_block == currBlock) {
+					m_first_free_block = currBlock->next_alloc;
 				}
 
 				// delete pointers
-				currBlock->NextAlloc = nullptr;
-				currBlock->PrevAlloc = nullptr;
+				currBlock->next_alloc = nullptr;
+				currBlock->prev_alloc = nullptr;
 			}
 
-			currBlock->NextAlloc = nullptr;
-			currBlock->PrevAlloc = m_LastAlloc;
-			if (m_LastAlloc != nullptr)
-				m_LastAlloc->NextAlloc = currBlock;
-			m_LastAlloc = currBlock;
-			t_tracking::Register(currBlock, nBytes, "no-desc", __FILE__, __LINE__);
-			m_UsedBytes += currBlock->FrameSize;
+			currBlock->next_alloc = nullptr;
+			currBlock->prev_alloc = p_last_alloc;
+			if (p_last_alloc != nullptr)
+				p_last_alloc->next_alloc = currBlock;
+			p_last_alloc = currBlock;
+			t_tracking::register_allocation(currBlock, nBytes, "no-desc", __FILE__, __LINE__);
+			p_used_bytes += currBlock->frame_size;
 
-			pm_AllocCount++;
+			p_alloc_count++;
 			return dataAddr;
 		}
 		// nothing found, cannot allocate anything
@@ -366,108 +366,108 @@ namespace helich {
 
 	// free a block, update the free list
 	template <class t_tracking>
-	void FreelistScheme<t_tracking>::FreeBlock(AllocHeaderType* block, AllocHeaderType* prevFree, AllocHeaderType* nextFree)
+	void freelist_scheme<t_tracking>::free_block(alloc_header_t* block, alloc_header_t* prevFree, alloc_header_t* nextFree)
 	{
 		// erase its content
-		s8* pData = (s8*)block + sizeof(AllocHeaderType);
+		p8 pData = (p8)block + sizeof(alloc_header_t);
 		//memset(pData, 0, block->GetDataCapacity());
-		memset(pData, 0, block->FrameSize - HL_ALIGNMENT - sizeof(AllocHeaderType));
-		block->NextAlloc = nullptr;
-		block->PrevAlloc = nullptr;
+		memset(pData, 0, block->frame_size - HL_ALIGNMENT - sizeof(alloc_header_t));
+		block->next_alloc = nullptr;
+		block->prev_alloc = nullptr;
 		//block->TrackingInfo = nullptr;
 
 		// adjust pointers
 		if (prevFree) {
-			block->PrevAlloc = prevFree;
-			prevFree->NextAlloc = block;
+			block->prev_alloc = prevFree;
+			prevFree->next_alloc = block;
 		}
 		if (nextFree) {
-			block->NextAlloc = nextFree;
-			nextFree->PrevAlloc = block;
+			block->next_alloc = nextFree;
+			nextFree->prev_alloc = block;
 		}
 	}
 
 	// check if 2 blocks can be joined
 	template <class t_tracking>
-	const bool FreelistScheme<t_tracking>::CanJoin(AllocHeaderType* leftBlock, AllocHeaderType* rightBlock)
+	const bool freelist_scheme<t_tracking>::can_join(alloc_header_t* leftBlock, alloc_header_t* rightBlock)
 	{
-		u32 leftEnd = (u32)leftBlock - leftBlock->Adjustment + leftBlock->FrameSize;
-		u32 rightStart = (u32)rightBlock - rightBlock->Adjustment;
+		aptr leftEnd = (aptr)leftBlock - leftBlock->adjustment + leftBlock->frame_size;
+		aptr rightStart = (aptr)rightBlock - rightBlock->adjustment;
 		return (leftEnd == rightStart);
 	}
 
 	// join 2 *free* blocks together
 	template <class t_tracking>
-	const bool FreelistScheme<t_tracking>::JoinBlocks(AllocHeaderType* leftBlock, AllocHeaderType* rightBlock)
+	const bool freelist_scheme<t_tracking>::join_blocks(alloc_header_t* leftBlock, alloc_header_t* rightBlock)
 	{
 		if (!leftBlock || !rightBlock)
 			return false;
 
-		if (CanJoin(leftBlock, rightBlock)) {
+		if (can_join(leftBlock, rightBlock)) {
 			// adjust left block's pointers
-			leftBlock->NextAlloc = rightBlock->NextAlloc;
+			leftBlock->next_alloc = rightBlock->next_alloc;
 
-			// update frameSize of left block
-			leftBlock->FrameSize += rightBlock->FrameSize;
+			// update frame_size of left block
+			leftBlock->frame_size += rightBlock->frame_size;
 
-			if (rightBlock->NextAlloc)
-				rightBlock->NextAlloc->PrevAlloc = leftBlock;
+			if (rightBlock->next_alloc)
+				rightBlock->next_alloc->prev_alloc = leftBlock;
 
 			// erase right block header as we don't need it anymore
-			memset(rightBlock, 0, sizeof(AllocHeaderType));
+			memset(rightBlock, 0, sizeof(alloc_header_t));
 			return true;
 		}
 		else return false;
 	}
 
 	template <class t_tracking>
-	void FreelistScheme<t_tracking>::Free(voidptr pData)
+	void freelist_scheme<t_tracking>::free(voidptr pData)
 	{
-		floral::lock_guard memGuard(m_AllocMutex);
-		AllocHeaderType* releaseBlock = (AllocHeaderType*)((s8*)pData - sizeof(AllocHeaderType));
-		m_UsedBytes -= releaseBlock->FrameSize;
-		t_tracking::Unregister(releaseBlock);
-		pm_FreeCount++;
+		floral::lock_guard memGuard(m_alloc_mutex);
+		alloc_header_t* releaseBlock = (alloc_header_t*)((p8)pData - sizeof(alloc_header_t));
+		p_used_bytes -= releaseBlock->frame_size;
+		t_tracking::unregister_allocation(releaseBlock);
+		p_free_count++;
 
-		if (releaseBlock->NextAlloc)
-			releaseBlock->NextAlloc->PrevAlloc = releaseBlock->PrevAlloc;
-		if (releaseBlock->PrevAlloc)
-			releaseBlock->PrevAlloc->NextAlloc = releaseBlock->NextAlloc;
-		if (releaseBlock == m_LastAlloc) {
-			m_LastAlloc = releaseBlock->PrevAlloc;
+		if (releaseBlock->next_alloc)
+			releaseBlock->next_alloc->prev_alloc = releaseBlock->prev_alloc;
+		if (releaseBlock->prev_alloc)
+			releaseBlock->prev_alloc->next_alloc = releaseBlock->next_alloc;
+		if (releaseBlock == p_last_alloc) {
+			p_last_alloc = releaseBlock->prev_alloc;
 		}
 
 		// search for nearest-after free block
-		AllocHeaderType* nextFree = m_FirstFreeBlock;
+		alloc_header_t* nextFree = m_first_free_block;
 		while (nextFree &&
-			((u32)nextFree <= (u32)releaseBlock)) {
-			nextFree = nextFree->NextAlloc;
+			((aptr)nextFree <= (aptr)releaseBlock)) {
+			nextFree = nextFree->next_alloc;
 		}
-		AllocHeaderType* prevFree = nextFree->PrevAlloc;
+		alloc_header_t* prevFree = nextFree->prev_alloc;
 
 		// free releaseBlock
-		FreeBlock(releaseBlock, prevFree, nextFree);
+		free_block(releaseBlock, prevFree, nextFree);
 
 		// update first free block
-		if ((u32)releaseBlock < (u32)m_FirstFreeBlock) {
-			m_FirstFreeBlock = releaseBlock;
+		if ((aptr)releaseBlock < (aptr)m_first_free_block) {
+			m_first_free_block = releaseBlock;
 		}
 		// join blocks if possible
-		if (JoinBlocks(prevFree, releaseBlock))
-			JoinBlocks(prevFree, nextFree);
-		else JoinBlocks(releaseBlock, nextFree);
+		if (join_blocks(prevFree, releaseBlock))
+			join_blocks(prevFree, nextFree);
+		else join_blocks(releaseBlock, nextFree);
 	}
 
 	template <class t_tracking>
-	void FreelistScheme<t_tracking>::FreeAll()
+	void freelist_scheme<t_tracking>::free_all()
 	{
-		floral::lock_guard memGuard(m_AllocMutex);
-		memset(m_BaseAddress, 0, m_SizeInBytes);
+		floral::lock_guard memGuard(m_alloc_mutex);
+		memset(p_base_address, 0, p_size_in_bytes);
 
-		m_FirstFreeBlock = (AllocHeaderType*)m_BaseAddress;
-		m_FirstFreeBlock->FrameSize = m_SizeInBytes;
-		m_FirstFreeBlock->Adjustment = 0;
-		m_FirstFreeBlock->NextAlloc = nullptr;
-		m_FirstFreeBlock->PrevAlloc = nullptr;
+		m_first_free_block = (alloc_header_t*)p_base_address;
+		m_first_free_block->frame_size = p_size_in_bytes;
+		m_first_free_block->adjustment = 0;
+		m_first_free_block->next_alloc = nullptr;
+		m_first_free_block->prev_alloc = nullptr;
 	}
 }

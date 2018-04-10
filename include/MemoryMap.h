@@ -21,7 +21,7 @@ namespace helich {
 		size									size_in_bytes;
 		voidptr									base_address;
 		voidptr									allocator_ptr;
-        alloc_region_dgbinfo_extractor			dbg_info_extractor;
+        dbginfo_extractor_func_t				dbg_info_extractor;
 	};
 }
 

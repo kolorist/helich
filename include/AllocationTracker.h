@@ -9,27 +9,27 @@
 
 namespace helich {
 
-class AllocationTracker {
+class allocation_tracker {
 public:
-	static const u32				k_HeaderPoolSize = 512;
+	static const u32							sk_header_pool_size = 512;
 
 public:
-	AllocationTracker();
-	~AllocationTracker();
+	allocation_tracker();
+	~allocation_tracker();
 
-	void										Initialize();
-	void										RegisterAllocation(voidptr ptr, const u32 nbytes, const_cstr desc, const_cstr file, const u32 line);
-	void										UnregisterAllocation(voidptr ptr);
-	void										DoSanityCheck();
-	const u32									GetAllocationCount() const		{ return m_NumAlloc; }
-	const u32									GetFreeCount() const			{ return m_NumFree; }
+	void										initialize();
+	void										register_allocation(voidptr i_ptr, const size i_bytes, const_cstr i_desc, const_cstr i_file, const u32 i_line);
+	void										unregister_allocation(voidptr i_ptr);
+	void										do_sanity_check();
+	const u32									get_allocation_count() const		{ return m_num_alloc; }
+	const u32									get_free_count() const				{ return m_num_free; }
 
 private:
-	u32											m_NumAlloc;
-	u32											m_NumFree;
+	u32											m_num_alloc;
+	u32											m_num_free;
 };
 
-extern AllocationTracker						g_HLAllocationTracker;
+extern allocation_tracker						g_allocation_tracker;
 
 }
 

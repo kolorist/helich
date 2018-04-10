@@ -11,37 +11,34 @@
 
 namespace helich {
 
-	struct DebugEntry {
-		voidptr									Address;
-		u32										SizeInBytes;
-		c8										Description[128];
-		c8										StackTrace[2048];
-
-		DebugEntry()
-		{}
+	struct debug_entry {
+		voidptr									address;
+		size									size_in_bytes;
+		c8										description[128];
+		c8										stack_trace[2048];
 	};
 
-	class DefaultTrackingPolicy {
+	class default_tracking_policy {
 	public:
-		typedef TrackedAllocHeader				AllocHeaderType;
+		typedef tracked_alloc_header			alloc_header_t;
 
 	public:
-		static void								Register(voidptr dataAddr, const u32 nBytes, const_cstr desc, const_cstr file, const u32 line);
-		static void								Unregister(voidptr ptr);
+		static void								register_allocation(voidptr i_dataAddr, const size i_bytes, const_cstr i_desc, const_cstr i_file, const u32 i_line);
+		static void								unregister_allocation(voidptr i_ptr);
 
 	private:
-		static u32								m_NumAlloc;
+		static u32								m_num_alloc;
 	};
 
 	// This policy will be used mostly by 'release' build
 
-	class NoTrackingPolicy {
+	class no_tracking_policy {
 	public:
-		typedef UntrackedAllocHeader			AllocHeaderType;
+		typedef untracked_alloc_header			alloc_header_t;
 
 	public:
-		static void								Register(voidptr dataAddr, const u32 nBytes, const_cstr desc, const_cstr file, const u32 line)	{}
-		static void								Unregister(voidptr ptr)																			{}
+		static void								register_allocation(voidptr i_dataAddr, const size i_bytes, const_cstr i_desc, const_cstr i_file, const u32 i_line)	{}
+		static void								unregister_allocation(voidptr i_ptr)																			{}
 	};
 }
 

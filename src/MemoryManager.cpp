@@ -12,26 +12,26 @@
 
 namespace helich {
 
-MemoryManager::MemoryManager()
-	: m_BaseAddress(nullptr)
+memory_manager::memory_manager()
+	: m_base_address(nullptr)
 {
 
 }
 
-MemoryManager::~MemoryManager()
+memory_manager::~memory_manager()
 {
 
 }
 
-const voidptr MemoryManager::AllocateGlobalMemory(voidptr baseAddress, const u32 sizeInBytes)
+const voidptr memory_manager::allocate_global_memory(voidptr i_baseAddress, const size i_sizeInBytes)
 {
 #if defined(_WIN32)
-	m_BaseAddress = (voidptr)VirtualAlloc((LPVOID)baseAddress,
-		sizeInBytes,
+	m_base_address = (voidptr)VirtualAlloc((LPVOID)i_baseAddress,
+		i_sizeInBytes,
 		MEM_COMMIT | MEM_RESERVE,
 		PAGE_READWRITE);
 #endif
-	return m_BaseAddress;
+	return m_base_address;
 }
 
 }

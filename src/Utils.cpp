@@ -3,9 +3,9 @@
 
 namespace helich {
 
-voidptr alignAddress(voidptr addr, u32 alignment /* = HL_ALIGNMENT */)
+voidptr align_address(voidptr i_addr, size i_alignment /* = HL_ALIGNMENT */)
 {
-    return (void*)((u32)addr + (alignment - ((u32)addr & (alignment - 1))));    
+    return (voidptr)((size)i_addr + (i_alignment - ((size)i_addr & (i_alignment - 1))));
 }
 
 }

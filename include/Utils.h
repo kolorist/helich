@@ -9,7 +9,7 @@
 
 namespace helich {
 
-voidptr											alignAddress(voidptr addr, u32 alignment = HL_ALIGNMENT);
+voidptr											align_address(voidptr i_addr, size i_alignment = HL_ALIGNMENT);
 
 }
 

@@ -12,121 +12,121 @@
 
 namespace helich {
 
-	extern FixedAllocator<PoolScheme, sizeof(DebugEntry), NoTrackingPolicy> g_TrackingAllocator;
+	extern fixed_allocator<pool_scheme, sizeof(debug_entry), no_tracking_policy> g_tracking_allocator;
 #define MEMORY_TRACKING_SIZE					SIZE_MB(32)
 #define MAX_MEM_REGIONS							32
 
-class MemoryManager {
+class memory_manager {
 public:
-	MemoryManager();
-	~MemoryManager();
+	memory_manager();
+	~memory_manager();
 
-	const voidptr								AllocateGlobalMemory(voidptr baseAddress, const u32 sizeInBytes);
+	const voidptr								allocate_global_memory(voidptr i_baseAddress, const size i_sizeInBytes);
 
-	template <class ... _AllocatorRegions>
-	const void Initialize(_AllocatorRegions ... regions) {
-		if (!m_BaseAddress) {
-			u32 totalSize = InternalComputeMem(regions...);
+	template <class ... t_allocator_regions>
+	const void initialize(t_allocator_regions ... i_regions) {
+		if (!m_base_address) {
+			size totalSize = internal_compute_mem(i_regions...);
 
-			// this call will update m_BaseAddress
-			AllocateGlobalMemory((voidptr)0x20000000, totalSize);
-			pm_MemRegionsNumber = 0;
+			// this call will update m_base_address
+			allocate_global_memory((voidptr)0x20000000, totalSize);
+			p_mem_regions_count = 0;
 
-			InternalInit(m_BaseAddress, 
-				regions...);
+			internal_init(m_base_address, 
+				i_regions...);
 		}
 	}
 
 private:
-	template <class _AllocatorType>
-	const u32 InternalComputeMem(MemoryRegion<_AllocatorType> al)
+	template <class t_allocator_type>
+	const size internal_compute_mem(memory_region<t_allocator_type> i_al)
 	{
-		return al.SizeInBytes + MEMORY_TRACKING_SIZE;
+		return i_al.size_in_bytes + MEMORY_TRACKING_SIZE;
 	}
 
-	template <class _AllocatorTypeHead, class ... _AllocatorTypeRests>
-	const u32 InternalComputeMem(MemoryRegion<_AllocatorTypeHead> headAl,
-		MemoryRegion<_AllocatorTypeRests> ... restAl)
+	template <class t_allocator_type_head, class ... t_allocator_type_rests>
+	const size internal_compute_mem(memory_region<t_allocator_type_head> i_headAl,
+		memory_region<t_allocator_type_rests> ... i_restAl)
 	{
-		return (headAl.SizeInBytes + InternalComputeMem(restAl...));
+		return (i_headAl.size_in_bytes + internal_compute_mem(i_restAl...));
 	}
 
-	template <class _AllocatorType>
-	const bool InternalInitTracking(voidptr baseAddress, 
-		MemoryRegion<_AllocatorType> al) 
+	template <class t_allocator_type>
+	const bool InternalInitTracking(voidptr i_baseAddress, 
+		memory_region<t_allocator_type> i_al) 
 	{
-        typedef typename _AllocatorType::AllocSchemeType SchemeType;
-        typedef typename SchemeType::AllocRegionType RegionType;
+        typedef typename t_allocator_type::alloc_scheme_t scheme_t;
+        typedef typename scheme_t::alloc_region_t region_t;
 
-		((_AllocatorType*)(al.AllocatorPtr))->MapTo(baseAddress, al.SizeInBytes, al.Name);
+		((t_allocator_type*)(i_al.allocator_ptr))->map_to(i_baseAddress, i_al.size_in_bytes, i_al.name);
 
-		strcpy(pm_MemRegions[pm_MemRegionsNumber].Name, "helich/tracking");
-		pm_MemRegions[pm_MemRegionsNumber].SizeInBytes = MEMORY_TRACKING_SIZE;
-		pm_MemRegions[pm_MemRegionsNumber].BaseAddress = baseAddress;
-        pm_MemRegions[pm_MemRegionsNumber].DbgInfoExtractor = (AllocRegionDebugInfoExtractFunc)&AllocRegionDebugInfoExtractor<RegionType>::ExtractInfo;
-		pm_MemRegions[pm_MemRegionsNumber].AllocatorPtr = (voidptr)al.AllocatorPtr;
-		pm_TotalMemInBytes += MEMORY_TRACKING_SIZE;
-		pm_MemRegionsNumber++;
+		strcpy(p_mem_regions[p_mem_regions_count].name, "helich/tracking");
+		p_mem_regions[p_mem_regions_count].size_in_bytes = MEMORY_TRACKING_SIZE;
+		p_mem_regions[p_mem_regions_count].base_address = i_baseAddress;
+        p_mem_regions[p_mem_regions_count].dbg_info_extractor = (dbginfo_extractor_func_t)&alloc_region_dbginfo_extractor<region_t>::extract_info;
+		p_mem_regions[p_mem_regions_count].allocator_ptr = (voidptr)i_al.allocator_ptr;
+		p_total_mem_in_bytes += MEMORY_TRACKING_SIZE;
+		p_mem_regions_count++;
 		return true;
 	}
 
 	// end of recursion
-	template <class _AllocatorType>
-	const bool InternalInit(voidptr baseAddress, 
-		MemoryRegion<_AllocatorType> al) 
+	template <class t_allocator_type>
+	const bool internal_init(voidptr i_baseAddress,
+		memory_region<t_allocator_type> i_al)
 	{
-        typedef typename _AllocatorType::AllocSchemeType SchemeType;
-        typedef typename SchemeType::AllocRegionType RegionType;
+        typedef typename t_allocator_type::alloc_scheme_t scheme_t;
+        typedef typename scheme_t::alloc_region_t region_t;
 
-		((_AllocatorType*)(al.AllocatorPtr))->MapTo(baseAddress, al.SizeInBytes, al.Name);
+		((t_allocator_type*)(i_al.allocator_ptr))->map_to(i_baseAddress, i_al.size_in_bytes, i_al.name);
 
-		strcpy(pm_MemRegions[pm_MemRegionsNumber].Name, al.Name);
-		pm_MemRegions[pm_MemRegionsNumber].SizeInBytes = al.SizeInBytes;
-		pm_MemRegions[pm_MemRegionsNumber].BaseAddress = baseAddress;
-        pm_MemRegions[pm_MemRegionsNumber].DbgInfoExtractor = (AllocRegionDebugInfoExtractFunc)&AllocRegionDebugInfoExtractor<RegionType>::ExtractInfo;
-		pm_MemRegions[pm_MemRegionsNumber].AllocatorPtr = (voidptr)al.AllocatorPtr;
-		pm_TotalMemInBytes += al.SizeInBytes;
-		pm_MemRegionsNumber++;
+		strcpy(p_mem_regions[p_mem_regions_count].name, i_al.name);
+		p_mem_regions[p_mem_regions_count].size_in_bytes = i_al.size_in_bytes;
+		p_mem_regions[p_mem_regions_count].base_address = i_baseAddress;
+        p_mem_regions[p_mem_regions_count].dbg_info_extractor = (dbginfo_extractor_func_t)&alloc_region_dbginfo_extractor<region_t>::extract_info;
+		p_mem_regions[p_mem_regions_count].allocator_ptr = (voidptr)i_al.allocator_ptr;
+		p_total_mem_in_bytes += i_al.size_in_bytes;
+		p_mem_regions_count++;
 
 		// last one, tracking debug info pool
-		s8* nextBase = (s8*)baseAddress + al.SizeInBytes;
+		s8* nextBase = (s8*)i_baseAddress + i_al.size_in_bytes;
 		InternalInitTracking(nextBase,
-			MemoryRegion<FixedAllocator<PoolScheme, sizeof(DebugEntry), NoTrackingPolicy>> { "helich/tracking", MEMORY_TRACKING_SIZE, &g_TrackingAllocator });
+			memory_region<fixed_allocator<pool_scheme, sizeof(debug_entry), no_tracking_policy>> { "helich/tracking", MEMORY_TRACKING_SIZE, &g_tracking_allocator });
 		return true;
 	}
 
 	// compile-time recursive initialization
-	template <class _AllocatorTypeHead, class ... _AllocatorTypeRests>
-	const bool InternalInit(voidptr baseAddress, 
-		MemoryRegion<_AllocatorTypeHead> headAl, 
-		MemoryRegion<_AllocatorTypeRests> ... restAl)
+	template <class t_allocator_type_head, class ... t_allocator_type_rests>
+	const bool internal_init(voidptr i_baseAddress,
+		memory_region<t_allocator_type_head> i_headAl,
+		memory_region<t_allocator_type_rests> ... i_restAl)
 	{
-        typedef typename _AllocatorTypeHead::AllocSchemeType SchemeType;
-        typedef typename SchemeType::AllocRegionType RegionType;
+        typedef typename t_allocator_type_head::alloc_scheme_t scheme_t;
+        typedef typename scheme_t::alloc_region_t region_t;
 
 		// init here
-		((_AllocatorTypeHead*)(headAl.AllocatorPtr))->MapTo(baseAddress, headAl.SizeInBytes, headAl.Name);
-		s8* nextBase = (s8*)baseAddress + headAl.SizeInBytes;
+		((t_allocator_type_head*)(i_headAl.allocator_ptr))->map_to(i_baseAddress, i_headAl.size_in_bytes, i_headAl.name);
+		s8* nextBase = (s8*)i_baseAddress + i_headAl.size_in_bytes;
 		
-		strcpy(pm_MemRegions[pm_MemRegionsNumber].Name, headAl.Name);
-		pm_MemRegions[pm_MemRegionsNumber].SizeInBytes = headAl.SizeInBytes;
-		pm_MemRegions[pm_MemRegionsNumber].BaseAddress = baseAddress;
-        pm_MemRegions[pm_MemRegionsNumber].DbgInfoExtractor = (AllocRegionDebugInfoExtractFunc)&AllocRegionDebugInfoExtractor<RegionType>::ExtractInfo;
-		pm_MemRegions[pm_MemRegionsNumber].AllocatorPtr = (voidptr)headAl.AllocatorPtr;
-		pm_TotalMemInBytes += headAl.SizeInBytes;
-		pm_MemRegionsNumber++;
+		strcpy(p_mem_regions[p_mem_regions_count].name, i_headAl.name);
+		p_mem_regions[p_mem_regions_count].size_in_bytes = i_headAl.size_in_bytes;
+		p_mem_regions[p_mem_regions_count].base_address = i_baseAddress;
+        p_mem_regions[p_mem_regions_count].dbg_info_extractor = (dbginfo_extractor_func_t)&alloc_region_dbginfo_extractor<region_t>::extract_info;
+		p_mem_regions[p_mem_regions_count].allocator_ptr = (voidallocator_ptr)i_headAl.allocator_ptr;
+		p_total_mem_in_bytes += i_headAl.size_in_bytes;
+		p_mem_regions_count++;
 
 		// recursion
-		return InternalInit(nextBase, restAl...);
+		return internal_init(nextBase, i_restAl...);
 	}
 	
 private:
-	voidptr                                 	m_BaseAddress;
+	voidptr                                 	m_base_address;
 
 public:
-	MemoryRegionInfo							pm_MemRegions[MAX_MEM_REGIONS];
-	u32											pm_MemRegionsNumber;
-	u32											pm_TotalMemInBytes;
+	memory_region_info							p_mem_regions[MAX_MEM_REGIONS];
+	u32											p_mem_regions_count;
+	size										p_total_mem_in_bytes;
 };
 
 }
