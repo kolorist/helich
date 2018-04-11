@@ -124,7 +124,7 @@ namespace helich {
 
 	public:
 		const p8								get_base_address() const 						{ return p_base_address; }
-		const size								get_size_in_bytse() const						{ return p_size_in_bytes; }
+		const size								get_size_in_bytes() const						{ return p_size_in_bytes; }
 		const size								get_used_bytes() const							{ return p_used_bytes; }
 
 		u32										p_alloc_count;
