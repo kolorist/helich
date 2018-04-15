@@ -12,6 +12,9 @@
 
 namespace helich {
 
+	// this function need to be called by users before using helich
+	extern void init_memory_system();
+
 	extern fixed_allocator<pool_scheme, sizeof(debug_entry), no_tracking_policy> g_tracking_allocator;
 #define MEMORY_TRACKING_SIZE					SIZE_MB(32)
 #define MAX_MEM_REGIONS							32
@@ -112,7 +115,7 @@ private:
 		p_mem_regions[p_mem_regions_count].size_in_bytes = i_headAl.size_in_bytes;
 		p_mem_regions[p_mem_regions_count].base_address = i_baseAddress;
         p_mem_regions[p_mem_regions_count].dbg_info_extractor = (dbginfo_extractor_func_t)&alloc_region_dbginfo_extractor<region_t>::extract_info;
-		p_mem_regions[p_mem_regions_count].allocator_ptr = (voidallocator_ptr)i_headAl.allocator_ptr;
+		p_mem_regions[p_mem_regions_count].allocator_ptr = (voidptr)i_headAl.allocator_ptr;
 		p_total_mem_in_bytes += i_headAl.size_in_bytes;
 		p_mem_regions_count++;
 

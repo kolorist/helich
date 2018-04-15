@@ -75,7 +75,7 @@ namespace helich {
 		m_current_marker += frame_size;
 
 		// register allocation
-		t_tracking::register(header, i_bytes, "no-desc", __FILE__, __LINE__);
+		t_tracking::register_allocation(header, i_bytes, "no-desc", __FILE__, __LINE__);
 
 		return static_cast<voidptr>(dataAddr);
 	}
@@ -101,7 +101,7 @@ namespace helich {
 			header->prev_alloc->next_alloc = nullptr;
 
 		// unregister allocation
-		t_tracking::unregister(header);
+		t_tracking::unregister_allocation(header);
 
 		p_last_alloc = header->prev_alloc;
 
