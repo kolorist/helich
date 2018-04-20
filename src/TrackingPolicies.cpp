@@ -22,11 +22,15 @@ namespace helich {
 		debug_entry* newEntry = g_tracking_allocator.allocate<debug_entry>();
 
 		// populate allocation information
-		strcpy_s(newEntry->description, 128, i_desc);
+		strcpy(newEntry->description, i_desc);
 		newEntry->size_in_bytes = i_bytes;
 		newEntry->address = i_dataAddr;
 		newEntry->stack_trace[0] = 0;
+#if defined(PLATFORM_WINDOWS)
 		floral::get_stack_trace(newEntry->stack_trace);
+#elif defined(PLATFORM_POSIX)
+		// TODO: add
+#endif
 
 		// update memory header info
 		memHeader->debug_info = newEntry;

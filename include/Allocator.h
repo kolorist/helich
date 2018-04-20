@@ -18,7 +18,7 @@ namespace helich {
 		public t_alloc_scheme<t_tracking_policy>
 	{
     public:
-        typedef typename t_alloc_scheme<typename t_tracking_policy>         alloc_scheme_t;
+        typedef t_alloc_scheme<t_tracking_policy>         alloc_scheme_t;
 
 	public:
 		allocator();
@@ -35,7 +35,7 @@ namespace helich {
 
 		template <class t_object_type>
 		static const size get_closure_size(const size i_dataSize) {
-			return (dataSize + sizeof(t_object_type) + HL_ALIGNMENT);
+			return (i_dataSize + sizeof(t_object_type) + HL_ALIGNMENT);
 		}
 
 		template <class t_object_type, class t_closure_allocator, class ... t_params>
@@ -79,7 +79,7 @@ namespace helich {
 		public t_alloc_scheme<t_elem_size, t_tracking_policy>
 	{
     public:
-        typedef typename t_alloc_scheme<t_elem_size, typename t_tracking_policy>  alloc_scheme_t;
+        typedef t_alloc_scheme<t_elem_size, t_tracking_policy>  alloc_scheme_t;
 
 	public:
 		fixed_allocator()

@@ -20,9 +20,6 @@ namespace helich {
         typedef variable_size_alloc_header<tracking_header_t>	alloc_header_t;
         typedef detail::alloc_region<alloc_header_t>        	alloc_region_t;
 
-	private:
-		typedef variable_size_alloc_header<typename t_tracking::alloc_header_t> alloc_header_t;
-
 	public:
 		stack_scheme();
 		
@@ -58,9 +55,6 @@ namespace helich {
         typedef fixed_size_alloc_header<tracking_header_t>		alloc_header_t;
         typedef detail::alloc_region<alloc_header_t>			alloc_region_t;
 
-	private:
-		typedef fixed_size_alloc_header<typename t_tracking::alloc_header_t>	alloc_header_t;
-
 	public:
 		pool_scheme();
 
@@ -91,9 +85,6 @@ namespace helich {
         typedef variable_size_alloc_header<tracking_header_t>	alloc_header_t;
         typedef detail::alloc_region<alloc_header_t>			alloc_region_t;
 
-	private:
-		typedef variable_size_alloc_header<typename t_tracking::alloc_header_t> alloc_header_t;
-
 	public:
 		freelist_scheme();
 
@@ -123,9 +114,9 @@ namespace helich {
 		floral::mutex							m_alloc_mutex;
 
 	public:
-		const p8								get_base_address() const 						{ return p_base_address; }
-		const size								get_size_in_bytes() const						{ return p_size_in_bytes; }
-		const size								get_used_bytes() const							{ return p_used_bytes; }
+		const p8								get_base_address() const 						{ return alloc_region_t::p_base_address; }
+		const size								get_size_in_bytes() const						{ return alloc_region_t::p_size_in_bytes; }
+		const size								get_used_bytes() const							{ return alloc_region_t::p_used_bytes; }
 
 		u32										p_alloc_count;
 		u32										p_free_count;

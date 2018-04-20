@@ -3,7 +3,7 @@ namespace helich {
     void alloc_region_dbginfo_extractor<t_alloc_region>::extract_info(voidptr i_allocRegion, debug_memory_block* i_memBlocks,
 			const u32 i_maxSize, u32& o_numBlocks)
     {
-		typedef t_alloc_region::alloc_header_t	header_t;
+		typedef typename t_alloc_region::alloc_header_t	header_t;
 
 		header_t* lastAlloc = ((t_alloc_region*)i_allocRegion)->p_last_alloc;
 		header_t* currAlloc = lastAlloc;

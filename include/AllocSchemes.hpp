@@ -13,7 +13,7 @@ namespace helich {
 	//////////////////////////////////////////////////////////////////////////
 	template <class t_tracking>
 	stack_scheme<t_tracking>::stack_scheme()
-		: alloc_region()
+		: alloc_region_t()
 	{
 
 	}
@@ -21,17 +21,17 @@ namespace helich {
 	template <class t_tracking>
 	stack_scheme<t_tracking>::~stack_scheme()
 	{
-		p_base_address = nullptr;
+		alloc_region_t::p_base_address = nullptr;
 		m_current_marker = nullptr;
-		p_size_in_bytes = 0;
+		alloc_region_t::p_size_in_bytes = 0;
 	}
 
 	template <class t_tracking>
 	void stack_scheme<t_tracking>::map_to(voidptr i_baseAddress, const size i_sizeInBytes, const_cstr i_name)
 	{
 		floral::lock_guard memGuard(m_alloc_mutex);
-		p_base_address = (p8)i_baseAddress;
-		p_size_in_bytes = i_sizeInBytes;
+		alloc_region_t::p_base_address = (p8)i_baseAddress;
+		alloc_region_t::p_size_in_bytes = i_sizeInBytes;
 		m_current_marker = (p8)i_baseAddress;
 	}
 
@@ -49,7 +49,7 @@ namespace helich {
 		// stack header's ([H..H]) size always equals to HL_ALIGNMENT (min = 4 bytes)
 		size frame_size = i_bytes + HL_ALIGNMENT + sizeof(alloc_header_t);
 		// out of memory check
-		assert((aptr)m_current_marker + frame_size <= (aptr)p_base_address + p_size_in_bytes);
+		assert((aptr)m_current_marker + frame_size <= (aptr)alloc_region_t::p_base_address + alloc_region_t::p_size_in_bytes);
 		// start address of the frame
 		p8 orgAddr = m_current_marker;
 
@@ -62,14 +62,14 @@ namespace helich {
 		size displacement = (aptr)headerAddr - (aptr)orgAddr;
 		alloc_header_t* header = (alloc_header_t*)headerAddr;
 		header->next_alloc = nullptr;
-		header->prev_alloc = p_last_alloc;
+		header->prev_alloc = alloc_region_t::p_last_alloc;
 		header->frame_size = frame_size;
 		header->adjustment = displacement;
-		if (p_last_alloc != nullptr) {
-			p_last_alloc->next_alloc = header;
+		if (alloc_region_t::p_last_alloc != nullptr) {
+			alloc_region_t::p_last_alloc->next_alloc = header;
 		}
 
-		p_last_alloc = header;
+		alloc_region_t::p_last_alloc = header;
 
 		// increase marker
 		m_current_marker += frame_size;
@@ -103,7 +103,7 @@ namespace helich {
 		// unregister allocation
 		t_tracking::unregister_allocation(header);
 
-		p_last_alloc = header->prev_alloc;
+		alloc_region_t::p_last_alloc = header->prev_alloc;
 
 		// reset memory region
 		memset(orgAddr, 0, frame_size);
@@ -115,8 +115,8 @@ namespace helich {
 	void stack_scheme<t_tracking>::free_all()
 	{
 		floral::lock_guard memGuard(m_alloc_mutex);
-		m_current_marker = p_base_address;
-		memset(p_base_address, 0, p_size_in_bytes);
+		m_current_marker = alloc_region_t::p_base_address;
+		memset(alloc_region_t::p_base_address, 0, alloc_region_t::p_size_in_bytes);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -124,7 +124,7 @@ namespace helich {
 	//////////////////////////////////////////////////////////////////////////
 	template <size t_elem_size, class t_tracking>
 	pool_scheme<t_elem_size, t_tracking>::pool_scheme()
-		: alloc_region()//p_last_alloc(nullptr)
+		: alloc_region_t()//alloc_region_t::p_last_alloc(nullptr)
 		, m_next_free_slot(nullptr)
 		, m_element_size(0)
 		, m_element_count(0)
@@ -144,18 +144,18 @@ namespace helich {
 		floral::lock_guard memGuard(m_alloc_mutex);
 		m_element_size = ((t_elem_size - 1) / HL_ALIGNMENT + 1) * HL_ALIGNMENT + sizeof(alloc_header_t);
 		m_element_count = (u32)(i_sizeInBytes / m_element_size);
-		p_base_address = (p8)i_baseAddress;
-		p_size_in_bytes = i_sizeInBytes;
+		alloc_region_t::p_base_address = (p8)i_baseAddress;
+		alloc_region_t::p_size_in_bytes = i_sizeInBytes;
 		// fill the assoc list
 		for (u32 i = 0; i < m_element_count - 1; i++) {
-			p8 addr = p_base_address + i * m_element_size;
-			p8 nextAddr = p_base_address + (i + 1) * m_element_size;
+			p8 addr = alloc_region_t::p_base_address + i * m_element_size;
+			p8 nextAddr = alloc_region_t::p_base_address + (i + 1) * m_element_size;
 			alloc_header_t* header = (alloc_header_t*)addr;
 			header->next_alloc = (alloc_header_t*)nextAddr;
 			header->frame_size = m_element_size;
 			header->adjustment = 0;
 		}
-		m_next_free_slot = (alloc_header_t*)p_base_address;
+		m_next_free_slot = (alloc_header_t*)alloc_region_t::p_base_address;
 	}
 
 	template <size t_elem_size, class t_tracking>
@@ -165,7 +165,7 @@ namespace helich {
 		// TODO: out of memory assertion
 
 		// we have return address right-away, the memory region was pre-aligned already
-		//p8 headerAddr = (p8)((aptr)p_base_address + (aptr)m_next_free_slot);
+		//p8 headerAddr = (p8)((aptr)alloc_region_t::p_base_address + (aptr)m_next_free_slot);
 		p8 headerAddr = (p8)m_next_free_slot;
 		p8 dataAddr = headerAddr + sizeof(alloc_header_t);
 		// next free slot is contained inside pooled element, update it by them
@@ -173,14 +173,14 @@ namespace helich {
 		alloc_header_t* header = (alloc_header_t*)headerAddr;
 		m_next_free_slot = header->next_alloc;
 		header->next_alloc = nullptr;
-		header->prev_alloc = p_last_alloc;
-		if (p_last_alloc != nullptr) {
-			p_last_alloc->next_alloc = header;
+		header->prev_alloc = alloc_region_t::p_last_alloc;
+		if (alloc_region_t::p_last_alloc != nullptr) {
+			alloc_region_t::p_last_alloc->next_alloc = header;
 		}
 
 		t_tracking::register_allocation(headerAddr, m_element_size, "no-desc", __FILE__, __LINE__);
 
-		p_last_alloc = header;
+		alloc_region_t::p_last_alloc = header;
 		// reset memory region
 		memset(dataAddr, 0, t_elem_size);
 
@@ -204,9 +204,9 @@ namespace helich {
 			header->prev_alloc->next_alloc = header->next_alloc;
 		}
 		// are we freeing the last allocation?
-		if (header == p_last_alloc) {
+		if (header == alloc_region_t::p_last_alloc) {
 			// yes, then update the list's tail element
-			p_last_alloc = header->prev_alloc;
+			alloc_region_t::p_last_alloc = header->prev_alloc;
 		}
 
 		memset(header, 0, m_element_size);
@@ -235,10 +235,10 @@ namespace helich {
 	//////////////////////////////////////////////////////////////////////////
 	template <class t_tracking>
 	freelist_scheme<t_tracking>::freelist_scheme()
-		: alloc_region()
+		: alloc_region_t()
 		, m_first_free_block(nullptr)
 		, k_min_frame_size(sizeof(alloc_header_t) + HL_ALIGNMENT + 1)
-		//, p_last_alloc(nullptr)
+		//, alloc_region_t::p_last_alloc(nullptr)
 		, p_alloc_count(0)
 		, p_free_count(0)
 	{
@@ -255,11 +255,11 @@ namespace helich {
 	void freelist_scheme<t_tracking>::map_to(voidptr i_baseAddress, const size i_sizeInBytes, const_cstr i_name)
 	{
 		floral::lock_guard memGuard(m_alloc_mutex);
-		p_base_address = (p8)i_baseAddress;
-		p_size_in_bytes = i_sizeInBytes;
+		alloc_region_t::p_base_address = (p8)i_baseAddress;
+		alloc_region_t::p_size_in_bytes = i_sizeInBytes;
 
-		m_first_free_block = (alloc_header_t*)p_base_address;
-		m_first_free_block->frame_size = p_size_in_bytes;
+		m_first_free_block = (alloc_header_t*)alloc_region_t::p_base_address;
+		m_first_free_block->frame_size = alloc_region_t::p_size_in_bytes;
 		m_first_free_block->adjustment = 0;
 		m_first_free_block->next_alloc = nullptr;
 		m_first_free_block->prev_alloc = nullptr;
@@ -350,12 +350,12 @@ namespace helich {
 			}
 
 			currBlock->next_alloc = nullptr;
-			currBlock->prev_alloc = p_last_alloc;
-			if (p_last_alloc != nullptr)
-				p_last_alloc->next_alloc = currBlock;
-			p_last_alloc = currBlock;
+			currBlock->prev_alloc = alloc_region_t::p_last_alloc;
+			if (alloc_region_t::p_last_alloc != nullptr)
+				alloc_region_t::p_last_alloc->next_alloc = currBlock;
+			alloc_region_t::p_last_alloc = currBlock;
 			t_tracking::register_allocation(currBlock, i_bytes, "no-desc", __FILE__, __LINE__);
-			p_used_bytes += currBlock->frame_size;
+			alloc_region_t::p_used_bytes += currBlock->frame_size;
 
 			p_alloc_count++;
 			return dataAddr;
@@ -425,7 +425,7 @@ namespace helich {
 	{
 		floral::lock_guard memGuard(m_alloc_mutex);
 		alloc_header_t* releaseBlock = (alloc_header_t*)((p8)i_data - sizeof(alloc_header_t));
-		p_used_bytes -= releaseBlock->frame_size;
+		alloc_region_t::p_used_bytes -= releaseBlock->frame_size;
 		t_tracking::unregister_allocation(releaseBlock);
 		p_free_count++;
 
@@ -433,8 +433,8 @@ namespace helich {
 			releaseBlock->next_alloc->prev_alloc = releaseBlock->prev_alloc;
 		if (releaseBlock->prev_alloc)
 			releaseBlock->prev_alloc->next_alloc = releaseBlock->next_alloc;
-		if (releaseBlock == p_last_alloc) {
-			p_last_alloc = releaseBlock->prev_alloc;
+		if (releaseBlock == alloc_region_t::p_last_alloc) {
+			alloc_region_t::p_last_alloc = releaseBlock->prev_alloc;
 		}
 
 		// search for nearest-after free block
@@ -462,10 +462,10 @@ namespace helich {
 	void freelist_scheme<t_tracking>::free_all()
 	{
 		floral::lock_guard memGuard(m_alloc_mutex);
-		memset(p_base_address, 0, p_size_in_bytes);
+		memset(alloc_region_t::p_base_address, 0, alloc_region_t::p_size_in_bytes);
 
-		m_first_free_block = (alloc_header_t*)p_base_address;
-		m_first_free_block->frame_size = p_size_in_bytes;
+		m_first_free_block = (alloc_header_t*)alloc_region_t::p_base_address;
+		m_first_free_block->frame_size = alloc_region_t::p_size_in_bytes;
 		m_first_free_block->adjustment = 0;
 		m_first_free_block->next_alloc = nullptr;
 		m_first_free_block->prev_alloc = nullptr;

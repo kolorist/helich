@@ -3,7 +3,6 @@
 
 // self-provided headers
 #include "AllocHeaders.h"
-#include "Allocator.h"
 #include "AllocSchemes.h"
 
 // 3rd-party headers

@@ -16,10 +16,10 @@ namespace detail {
 
 	public:
 		alloc_region()
-			: p_base_address(nullptr)
+            : p_last_alloc(nullptr)
+			, p_base_address(nullptr)
 			, p_size_in_bytes(0)
 			, p_used_bytes(0)
-            , p_last_alloc(nullptr)
 		{ }
 
 	protected:
