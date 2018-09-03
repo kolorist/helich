@@ -81,6 +81,24 @@ namespace helich {
 	}
 
 	template <class t_tracking>
+	voidptr stack_scheme<t_tracking>::reallocate(voidptr i_data, const size i_newBytes)
+	{
+		floral::lock_guard memGuard(m_alloc_mutex);
+		voidptr newAllocation = allocate(i_newBytes);
+
+		if (newAllocation != nullptr) {
+			alloc_header_t* oldHeader = (alloc_header_t*)i_data - 1;
+			size dataSizeBytes = oldHeader->frame_size - sizeof(alloc_header_t) - HL_ALIGNMENT;
+
+			// memcpy
+			memcpy(newAllocation, i_data, dataSizeBytes);
+
+			return newAllocation;
+		}
+		return nullptr;
+	}
+
+	template <class t_tracking>
 	void stack_scheme<t_tracking>::free(voidptr i_data)
 	{
 		floral::lock_guard memGuard(m_alloc_mutex);
@@ -116,6 +134,8 @@ namespace helich {
 	{
 		floral::lock_guard memGuard(m_alloc_mutex);
 		m_current_marker = alloc_region_t::p_base_address;
+		p_last_alloc = nullptr;
+		p_used_bytes = 0;
 		memset(alloc_region_t::p_base_address, 0, alloc_region_t::p_size_in_bytes);
 	}
 
@@ -361,6 +381,28 @@ namespace helich {
 			return dataAddr;
 		}
 		// nothing found, cannot allocate anything
+		return nullptr;
+	}
+
+	template <class t_tracking>
+	voidptr freelist_scheme<t_tracking>::reallocate(voidptr i_data, const size i_newBytes)
+	{
+		floral::lock_guard memGuard(m_alloc_mutex);
+		voidptr newAllocation = allocate(i_newBytes);
+
+		if (newAllocation != nullptr) {
+			alloc_header_t* releaseBlock = (alloc_header_t*)((p8)i_data - sizeof(alloc_header_t));
+			size dataSizeBytes = releaseBlock->frame_size - sizeof(alloc_header_t) - HL_ALIGNMENT;
+
+			// memcpy
+			memcpy(newAllocation, i_data, dataSizeBytes);
+
+			// now we can free the old data
+			// FIXME: this will trigger the recursive mutex mechanism, it's BAD. Please google.
+			free(i_data);
+
+			return newAllocation;
+		}
 		return nullptr;
 	}
 
