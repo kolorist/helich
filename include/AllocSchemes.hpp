@@ -142,8 +142,8 @@ void stack_scheme<t_tracking>::free_all()
 {
 	floral::lock_guard memGuard(m_alloc_mutex);
 	m_current_marker = alloc_region_t::p_base_address;
-	p_last_alloc = nullptr;
-	p_used_bytes = 0;
+	alloc_region_t::p_last_alloc = nullptr;
+	alloc_region_t::p_used_bytes = 0;
 #if defined(ZERO_OUT_MEMORY)
 	memset(alloc_region_t::p_base_address, 0, alloc_region_t::p_size_in_bytes);
 #endif
@@ -408,7 +408,6 @@ voidptr freelist_scheme<t_tracking>::reallocate(voidptr i_data, const size i_new
 		alloc_header_t* releaseBlock = (alloc_header_t*)((p8)i_data - sizeof(alloc_header_t));
 		size dataSizeBytes = releaseBlock->frame_size - sizeof(alloc_header_t) - HL_ALIGNMENT;
 
-		// memcpy
 		memcpy(newAllocation, i_data, dataSizeBytes);
 
 		// now we can free the old data
@@ -424,15 +423,13 @@ voidptr freelist_scheme<t_tracking>::reallocate(voidptr i_data, const size i_new
 template <class t_tracking>
 void freelist_scheme<t_tracking>::free_block(alloc_header_t* i_block, alloc_header_t* i_prevFree, alloc_header_t* i_nextFree)
 {
+#if defined(ZERO_OUT_MEMORY)
 	// erase its content
 	p8 pData = (p8)i_block + sizeof(alloc_header_t);
-	//memset(pData, 0, i_block->GetDataCapacity());
-#if defined(ZERO_OUT_MEMORY)
 	memset(pData, 0, i_block->frame_size - HL_ALIGNMENT - sizeof(alloc_header_t));
 #endif
 	i_block->next_alloc = nullptr;
 	i_block->prev_alloc = nullptr;
-	//i_block->TrackingInfo = nullptr;
 
 	// adjust pointers
 	if (i_prevFree) {
