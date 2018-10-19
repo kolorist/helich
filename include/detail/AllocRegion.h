@@ -31,16 +31,20 @@ namespace detail {
 		p8										p_base_address;
 		size									p_size_in_bytes;
 		size									p_used_bytes;
+
+		// TODO: m_?
+		floral::mutex							m_alloc_mutex;
 	};
 
 }
 
-    typedef void (*dbginfo_extractor_func_t)(voidptr, debug_memory_block*, const u32, u32&);
+typedef void (*dbginfo_extractor_func_t)(voidptr, debug_memory_block*, const u32, u32&);
 
-    template <class t_alloc_region>
-    struct alloc_region_dbginfo_extractor {
-        static void                             extract_info(voidptr i_allocRegion, debug_memory_block* i_memBlocks, const u32 i_maxSize, u32& o_numBlocks);
-    };
+template <class t_alloc_region>
+struct alloc_region_dbginfo_extractor {
+	static void                             extract_info(voidptr i_allocRegion, debug_memory_block* i_memBlocks, const u32 i_maxSize, u32& o_numBlocks);
+};
+
 }
 
 #include "AllocRegion.hpp"
