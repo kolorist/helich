@@ -32,7 +32,7 @@ public:
 			size totalSize = internal_compute_mem(i_regions...);
 
 			// this call will update m_base_address
-			allocate_global_memory((voidptr)0x20000000, totalSize);
+			allocate_global_memory(nullptr, totalSize);
 			p_mem_regions_count = 0;
 
 			internal_init(m_base_address, 
