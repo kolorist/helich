@@ -80,6 +80,8 @@ voidptr stack_scheme<t_tracking>::allocate(const size i_bytes)
 	// increase marker
 	m_current_marker += frame_size;
 
+	alloc_region_t::p_used_bytes += frame_size;
+
 	// register allocation
 	t_tracking::register_allocation(header, i_bytes, "no-desc", __FILE__, __LINE__);
 
@@ -135,6 +137,8 @@ void stack_scheme<t_tracking>::free(voidptr i_data)
 #endif
 	// done validation, free memory
 	m_current_marker -= frame_size;
+
+	alloc_region_t::p_used_bytes -= frame_size;
 }
 
 template <class t_tracking>
@@ -216,6 +220,8 @@ voidptr pool_scheme<t_elem_size, t_tracking>::allocate()
 	memset(dataAddr, 0, t_elem_size);
 #endif
 
+	alloc_region_t::p_used_bytes += m_element_size;
+
 	return dataAddr;
 }
 
@@ -254,12 +260,15 @@ void pool_scheme<t_elem_size, t_tracking>::free(voidptr i_data)
 	// update next free slot to this slot's index
 	//m_NextFreeIdx = idx;
 	m_next_free_slot = header;
+
+	alloc_region_t::p_used_bytes -= m_element_size;
 }
 
 template <size t_elem_size, class t_tracking>
 void pool_scheme<t_elem_size, t_tracking>::free_all()
 {
 	floral::lock_guard memGuard(alloc_region_t::m_alloc_mutex);
+	alloc_region_t::p_used_bytes = 0;
 	// TODO
 }
 

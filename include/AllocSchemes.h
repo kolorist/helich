@@ -46,6 +46,12 @@ protected:
 	
 private:
 	p8										m_current_marker;
+	
+public:
+	const p8								get_base_address() const 						{ return alloc_region_t::p_base_address; }
+	const size								get_size_in_bytes() const						{ return alloc_region_t::p_size_in_bytes; }
+	const size								get_used_bytes() const							{ return alloc_region_t::p_used_bytes; }
+
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -75,6 +81,11 @@ private:
 	alloc_header_t*							m_next_free_slot;
 	size									m_element_size;
 	u32										m_element_count;
+	
+public:
+	const p8								get_base_address() const 						{ return alloc_region_t::p_base_address; }
+	const size								get_size_in_bytes() const						{ return alloc_region_t::p_size_in_bytes; }
+	const size								get_used_bytes() const							{ return alloc_region_t::p_used_bytes; }
 };
 
 //////////////////////////////////////////////////////////////////////////
