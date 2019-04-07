@@ -1,10 +1,9 @@
-#ifndef __HL_ALLOC_REGION_H__
-#define __HL_ALLOC_REGION_H__
+#pragma once
 
 // 3rd-party headers
 #include <floral.h>
 
-#include "MemoryDebug.h"
+#include "helich/MemoryDebug.h"
 
 namespace helich {
 namespace detail {
@@ -48,5 +47,3 @@ struct alloc_region_dbginfo_extractor {
 }
 
 #include "AllocRegion.hpp"
-
-#endif // __HL_ALLOC_REGION_H__

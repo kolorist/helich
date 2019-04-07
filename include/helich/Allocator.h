@@ -1,10 +1,9 @@
-#ifndef __HL_ALLOCATOR_H__
-#define __HL_ALLOCATOR_H__
+#pragma once
 
 #include "TrackingPolicies.h"
 
 // 3rd-party headers
-#include <stdaliases.h>
+#include <floral/stdaliases.h>
 #include <new>
 
 namespace helich {
@@ -96,5 +95,3 @@ namespace helich {
 }
 
 #include "Allocator.hpp"
-
-#endif // __HL_ALLOCATOR_H__

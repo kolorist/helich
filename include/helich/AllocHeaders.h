@@ -1,8 +1,7 @@
-#ifndef __HL_ALLOC_HEADERS_H__
-#define __HL_ALLOC_HEADERS_H__
+#pragma once
 
 // 3rd-party headers
-#include <stdaliases.h>
+#include <floral/stdaliases.h>
 
 namespace helich {
 
@@ -41,5 +40,3 @@ namespace helich {
 	struct untracked_alloc_header {
 	};
 }
-
-#endif // __HL_ALLOC_HEADERS_H__

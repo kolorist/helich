@@ -1,5 +1,4 @@
-#ifndef __HELICH_MEMORY_MANAGER_H__
-#define __HELICH_MEMORY_MANAGER_H__
+#pragma once
 
 #include <floral.h>
 
@@ -133,5 +132,3 @@ public:
 };
 
 }
-
-#endif // __HELICH_MEMORY_MANAGER_H__

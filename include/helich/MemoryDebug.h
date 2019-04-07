@@ -1,7 +1,6 @@
-#ifndef __HL_MEMORY_DEBUG_H__
-#define __HL_MEMORY_DEBUG_H__
+#pragma once
 
-#include <stdaliases.h>
+#include <floral/stdaliases.h>
 
 namespace helich {
     struct debug_memory_block {
@@ -10,5 +9,3 @@ namespace helich {
         bool                                    is_allocated;
     };
 }
-
-#endif // __HL_MEMORY_DEBUG_H__

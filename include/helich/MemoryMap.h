@@ -1,5 +1,4 @@
-#ifndef __HELICH_MEMORY_MAP_H__
-#define __HELICH_MEMORY_MAP_H__
+#pragma once
 
 #include <floral.h>
 
@@ -24,5 +23,3 @@ namespace helich {
         dbginfo_extractor_func_t				dbg_info_extractor;
 	};
 }
-
-#endif // __HELICH_MEMORY_MAP_H__

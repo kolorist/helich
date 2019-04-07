@@ -1,11 +1,9 @@
-#ifndef __HL_ALLOCATION_TRACKER_H__
-#define __HL_ALLOCATION_TRACKER_H__
+#pragma once
 
 #include "macros.h"
-
 #include "PoolAllocator.h"
 
-#include <stdaliases.h>
+#include <floral/stdaliases.h>
 
 namespace helich {
 
@@ -32,5 +30,3 @@ private:
 extern allocation_tracker						g_allocation_tracker;
 
 }
-
-#endif // __HL_ALLOCATION_TRACKER_H__

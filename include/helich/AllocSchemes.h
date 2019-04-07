@@ -1,5 +1,4 @@
-#ifndef __HL_ALLOC_SCHEMES_H__
-#define __HL_ALLOC_SCHEMES_H__
+#pragma once
 
 // self-provided headers
 #include "macros.h"
@@ -139,5 +138,3 @@ public:
 }
 
 #include "AllocSchemes.hpp"
-
-#endif // __HL_ALLOC_SCHEMES_H__

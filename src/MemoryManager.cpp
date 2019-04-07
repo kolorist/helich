@@ -1,6 +1,6 @@
-#include "MemoryManager.h"
+#include "helich/MemoryManager.h"
 
-#include "MemoryMap.h"
+#include "helich/MemoryMap.h"
 
 #if defined(PLATFORM_WINDOWS)
 #	include <Windows.h>

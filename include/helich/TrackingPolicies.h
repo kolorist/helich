@@ -1,12 +1,10 @@
-#ifndef __HL_TRACKING_POLICIES_H__
-#define __HL_TRACKING_POLICIES_H__
-
+#pragma once
 // self-provided headers
 #include "AllocHeaders.h"
 #include "AllocSchemes.h"
 
 // 3rd-party headers
-#include <stdaliases.h>
+#include <floral/stdaliases.h>
 
 namespace helich {
 
@@ -40,5 +38,3 @@ namespace helich {
 		static void								unregister_allocation(voidptr i_ptr)																			{}
 	};
 }
-
-#endif // __HL_TRACKING_POLICIES_H__
