@@ -3,6 +3,8 @@
 // self-provided headers
 #include "Utils.h"
 
+#include <floral/assert/assert.h>
+
 // 3rd-party headers
 #include <cassert>
 #include <string.h>
@@ -120,7 +122,7 @@ void stack_scheme<t_tracking>::free(voidptr i_data)
 	p8 orgAddr = (p8)header - displacement;
 	p8 lastAllocAddr = m_current_marker - frame_size;
 
-	assert(orgAddr == lastAllocAddr && "Invalid free: not in allocation order");
+	FLORAL_ASSERT_MSG(orgAddr == lastAllocAddr, "Invalid free: not in allocation order");
 
 	// adjust header
 	if (header->prev_alloc)

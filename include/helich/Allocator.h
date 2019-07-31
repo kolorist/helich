@@ -68,7 +68,14 @@ namespace helich {
 		template <class t_object_type>
 		t_object_type* allocate_array(const size i_elemCount) {
 			voidptr addr = t_alloc_scheme<t_tracking_policy>::allocate(sizeof(t_object_type) * i_elemCount);
-			return new (addr) t_object_type[i_elemCount];
+			//return new (addr) t_object_type[i_elemCount];
+			aptr elemPtr = (aptr)addr;
+			for (size i = 0; i < i_elemCount; i++)
+			{
+				new ((voidptr)elemPtr) t_object_type();
+				elemPtr += sizeof(t_object_type);
+			}
+			return (t_object_type*)addr;
 		}
 	};
 
