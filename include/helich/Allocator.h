@@ -77,6 +77,12 @@ namespace helich {
 			}
 			return (t_object_type*)addr;
 		}
+		
+		template <class t_object_type>
+		void free(t_object_type* i_objPtr) {
+			i_objPtr->~t_object_type();
+			t_alloc_scheme<t_tracking_policy>::free(i_objPtr);
+		}
 	};
 
 	//////////////////////////////////////////////////////////////////////////
@@ -97,6 +103,12 @@ namespace helich {
 		t_object_type* allocate(t_params... i_params) {
 			voidptr addr = t_alloc_scheme<t_elem_size, t_tracking_policy>::allocate();
 			return new (addr) t_object_type(i_params...);
+		}
+		
+		template <class t_object_type>
+		void free(t_object_type* i_objPtr) {
+			i_objPtr->~t_object_type();
+			t_alloc_scheme<t_elem_size, t_tracking_policy>::free(i_objPtr);
 		}
 	};
 }
