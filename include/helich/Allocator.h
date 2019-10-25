@@ -83,6 +83,11 @@ namespace helich {
 			i_objPtr->~t_object_type();
 			t_alloc_scheme<t_tracking_policy>::free(i_objPtr);
 		}
+
+		template <>
+		void free(void* i_objPtr) {
+			t_alloc_scheme<t_tracking_policy>::free(i_objPtr);
+		}
 	};
 
 	//////////////////////////////////////////////////////////////////////////
@@ -109,6 +114,11 @@ namespace helich {
 		void free(t_object_type* i_objPtr) {
 			i_objPtr->~t_object_type();
 			t_alloc_scheme<t_elem_size, t_tracking_policy>::free(i_objPtr);
+		}
+
+		template <>
+		void free(void* i_objPtr) {
+			t_alloc_scheme<t_tracking_policy>::free(i_objPtr);
 		}
 	};
 }
