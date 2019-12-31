@@ -58,6 +58,10 @@ namespace helich {
 		voidptr allocate(const size i_bytes) {
 			return t_alloc_scheme<t_tracking_policy>::allocate(i_bytes);
 		}
+		
+		voidptr reallocate(void* i_ptr, const size i_newBytes) {
+			return t_alloc_scheme<t_tracking_policy>::reallocate(i_ptr, i_newBytes);
+		}
 
 		template <class t_object_type, class ... t_params>
 		t_object_type* allocate(t_params... i_params) {
