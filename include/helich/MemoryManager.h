@@ -9,16 +9,20 @@
 #include "TrackingPolicies.h"
 #include "detail/AllocRegion.h"
 
-namespace helich {
+namespace helich
+{
 
-	// this function need to be called by users before using helich
-	extern void init_memory_system();
+// this function need to be called by users before using helich
+extern void init_memory_system();
 
-	extern fixed_allocator<pool_scheme, sizeof(debug_entry), no_tracking_policy> g_tracking_allocator;
+extern fixed_allocator<pool_scheme, sizeof(debug_entry), no_tracking_policy>	g_tracking_allocator;
+extern fixed_allocator<pool_scheme, 128, no_tracking_policy>					g_description_allocator;
+
 #define MEMORY_TRACKING_SIZE					SIZE_MB(32)
 #define MAX_MEM_REGIONS							32
 
-class memory_manager {
+class memory_manager
+{
 public:
 	memory_manager();
 	~memory_manager();

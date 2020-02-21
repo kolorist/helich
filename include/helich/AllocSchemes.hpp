@@ -42,7 +42,7 @@ void stack_scheme<t_tracking>::map_to(voidptr i_baseAddress, const size i_sizeIn
 }
 
 template <class t_tracking>
-voidptr stack_scheme<t_tracking>::allocate(const size i_bytes)
+voidptr stack_scheme<t_tracking>::allocate(const size i_bytes, const_cstr i_desc /* = nullptr */)
 {
 	floral::lock_guard memGuard(alloc_region_t::m_alloc_mutex);
 	// the whole stack frame size, count all headers, displacement, data, ...
@@ -72,6 +72,14 @@ voidptr stack_scheme<t_tracking>::allocate(const size i_bytes)
 	header->next_alloc = nullptr;
 	header->prev_alloc = alloc_region_t::p_last_alloc;
 	header->frame_size = frame_size;
+	if (i_desc)
+	{
+		strcpy(header->description, i_desc);
+	}
+	else
+	{
+		memset(header->description, 0, 64);
+	}
 	header->adjustment = displacement;
 	if (alloc_region_t::p_last_alloc != nullptr) {
 		alloc_region_t::p_last_alloc->next_alloc = header;
@@ -96,7 +104,8 @@ voidptr stack_scheme<t_tracking>::reallocate(voidptr i_data, const size i_newByt
 	floral::lock_guard memGuard(alloc_region_t::m_alloc_mutex);
 	voidptr newAllocation = allocate(i_newBytes);
 
-	if (newAllocation != nullptr) {
+	if (newAllocation != nullptr)
+	{
 		alloc_header_t* oldHeader = (alloc_header_t*)i_data - 1;
 		size dataSizeBytes = oldHeader->frame_size - sizeof(alloc_header_t) - HL_ALIGNMENT;
 
@@ -195,7 +204,7 @@ void pool_scheme<t_elem_size, t_tracking>::map_to(voidptr i_baseAddress, const s
 }
 
 template <size t_elem_size, class t_tracking>
-voidptr pool_scheme<t_elem_size, t_tracking>::allocate()
+voidptr pool_scheme<t_elem_size, t_tracking>::allocate(const_cstr i_desc /* = nullptr */)
 {
 	floral::lock_guard memGuard(alloc_region_t::m_alloc_mutex);
 	// TODO: out of memory assertion
@@ -210,7 +219,16 @@ voidptr pool_scheme<t_elem_size, t_tracking>::allocate()
 	m_next_free_slot = header->next_alloc;
 	header->next_alloc = nullptr;
 	header->prev_alloc = alloc_region_t::p_last_alloc;
-	if (alloc_region_t::p_last_alloc != nullptr) {
+	if (i_desc)
+	{
+		strcpy(header->description, i_desc);
+	}
+	else
+	{
+		memset(header->description, 0, 64);
+	}
+	if (alloc_region_t::p_last_alloc != nullptr)
+	{
 		alloc_region_t::p_last_alloc->next_alloc = header;
 	}
 
@@ -325,7 +343,7 @@ const bool freelist_scheme<t_tracking>::can_create_new_block(alloc_header_t* i_h
 }
 
 template <class t_tracking>
-voidptr freelist_scheme<t_tracking>::allocate(const size i_bytes)
+voidptr freelist_scheme<t_tracking>::allocate(const size i_bytes, const_cstr i_desc /* = nullptr */)
 {
 	floral::lock_guard memGuard(alloc_region_t::m_alloc_mutex);
 	// first-fit strategy
@@ -396,6 +414,14 @@ voidptr freelist_scheme<t_tracking>::allocate(const size i_bytes)
 
 		currBlock->next_alloc = nullptr;
 		currBlock->prev_alloc = alloc_region_t::p_last_alloc;
+		if (i_desc)
+		{
+			strcpy(currBlock->description, i_desc);
+		}
+		else
+		{
+			memset(currBlock->description, 0, 64);
+		}
 		if (alloc_region_t::p_last_alloc != nullptr)
 			alloc_region_t::p_last_alloc->next_alloc = currBlock;
 		alloc_region_t::p_last_alloc = currBlock;

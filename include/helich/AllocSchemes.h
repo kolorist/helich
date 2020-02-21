@@ -23,7 +23,7 @@ public:
 	stack_scheme();
 	
 	void									map_to(voidptr i_baseAddress, const size i_sizeInBytes, const_cstr i_name);
-	voidptr									allocate(const size i_bytes);
+	voidptr									allocate(const size i_bytes, const_cstr i_desc = nullptr);
 	// NOTE 1: 'reallocate' function of 'stack_scheme' will not free the old data, it shall become wasted
 	// why? because it's stack scheme, we are not gonna check if the reallocating region is the top one in the stack
 	// though it's possible to do so
@@ -68,7 +68,7 @@ public:
 	pool_scheme();
 
 	void									map_to(voidptr i_baseAddress, const size i_sizeInBytes, const_cstr i_name);
-	voidptr									allocate();
+	voidptr									allocate(const_cstr i_desc = nullptr);
 	void									free(voidptr i_data);
 
 	void									free_all();
@@ -102,7 +102,7 @@ public:
 	freelist_scheme();
 
 	void									map_to(voidptr i_baseAddress, const size i_sizeInBytes, const_cstr i_name);
-	voidptr									allocate(const size i_bytes);
+	voidptr									allocate(const size i_bytes, const_cstr i_desc = nullptr);
 	voidptr									reallocate(voidptr i_data, const size i_newBytes);
 	void									free(voidptr i_data);
 

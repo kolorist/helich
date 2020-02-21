@@ -1,4 +1,7 @@
-namespace helich {
+#include <string.h>
+
+namespace helich
+{
 
 template <class t_alloc_region>
 void alloc_region_dbginfo_extractor<t_alloc_region>::extract_info(voidptr i_allocRegion, debug_memory_block* i_memBlocks,
@@ -13,10 +16,12 @@ void alloc_region_dbginfo_extractor<t_alloc_region>::extract_info(voidptr i_allo
 	header_t* lastAlloc = allocRegion->p_last_alloc;
 	header_t* currAlloc = lastAlloc;
 	u32 numAllocBlocks = 0;
-	while (currAlloc != nullptr) {
+	while (currAlloc != nullptr)
+	{
 		FLORAL_ASSERT_MSG(numAllocBlocks <= i_maxSize, "Error when building Allocation Block list (not enough array size)");
 
 		i_memBlocks[numAllocBlocks].frame_size = currAlloc->frame_size;
+		strcpy(i_memBlocks[numAllocBlocks].description, currAlloc->description);
 		i_memBlocks[numAllocBlocks].frame_address = (p8)((aptr)currAlloc - currAlloc->adjustment);
 
 		numAllocBlocks++;

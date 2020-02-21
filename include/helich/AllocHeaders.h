@@ -3,7 +3,8 @@
 // 3rd-party headers
 #include <floral/stdaliases.h>
 
-namespace helich {
+namespace helich
+{
 
 	/*
 	 * types of allocation header:
@@ -16,18 +17,22 @@ namespace helich {
 	 */
 
 	template <class t_tracking_header>
-	struct fixed_size_alloc_header : t_tracking_header {
+	struct fixed_size_alloc_header : t_tracking_header
+	{
 		fixed_size_alloc_header*				next_alloc;
 		fixed_size_alloc_header*				prev_alloc;
+		c8										description[64];
 		size									frame_size;
 		size									adjustment;			// cannot use u8 for arithmetic operations,
 																	// because we will have to downcast from u64 / u32 -> u8
 	};
 
 	template <class t_tracking_header>
-	struct variable_size_alloc_header : t_tracking_header {
+	struct variable_size_alloc_header : t_tracking_header
+	{
 		variable_size_alloc_header*				next_alloc;
 		variable_size_alloc_header*				prev_alloc;
+		c8										description[64];
 		size									frame_size;
 		size									adjustment;
 	};
