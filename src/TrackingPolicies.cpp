@@ -28,7 +28,7 @@ namespace helich {
 		newEntry->size_in_bytes = i_bytes;
 		newEntry->address = i_dataAddr;
 		newEntry->stack_trace[0] = 0;
-#if defined(PLATFORM_WINDOWS)
+#if defined(FLORAL_PLATFORM_WINDOWS)
 		floral::get_stack_trace(newEntry->stack_trace);
 #elif defined(PLATFORM_POSIX)
 		// TODO: add

@@ -2,7 +2,7 @@
 
 #include "helich/MemoryMap.h"
 
-#if defined(PLATFORM_WINDOWS)
+#if defined(FLORAL_PLATFORM_WINDOWS)
 #	include <Windows.h>
 #	include <iostream>
 #else
@@ -23,7 +23,7 @@ memory_manager::~memory_manager()
 
 const voidptr memory_manager::allocate_global_memory(voidptr i_baseAddress, const size i_sizeInBytes)
 {
-#if defined(PLATFORM_WINDOWS)
+#if defined(FLORAL_PLATFORM_WINDOWS)
 	m_base_address = (voidptr)VirtualAlloc((LPVOID)i_baseAddress,
 		i_sizeInBytes,
 		MEM_COMMIT | MEM_RESERVE,
