@@ -288,8 +288,8 @@ template <size t_elem_size, class t_tracking>
 void pool_scheme<t_elem_size, t_tracking>::free_all()
 {
 	floral::lock_guard memGuard(alloc_region_t::m_alloc_mutex);
+	alloc_region_t::p_last_alloc = nullptr;
 	alloc_region_t::p_used_bytes = 0;
-	// TODO
 }
 
 
@@ -556,6 +556,11 @@ template <class t_tracking>
 void freelist_scheme<t_tracking>::free_all()
 {
 	floral::lock_guard memGuard(alloc_region_t::m_alloc_mutex);
+
+	alloc_region_t::p_last_alloc = nullptr;
+	alloc_region_t::p_used_bytes = 0;
+	p_alloc_count = 0;
+	p_free_count = 0;
 #if defined(ZERO_OUT_MEMORY)
 	memset(alloc_region_t::p_base_address, 0, alloc_region_t::p_size_in_bytes);
 #endif
