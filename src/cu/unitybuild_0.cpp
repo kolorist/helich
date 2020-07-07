@@ -1,4 +1,4 @@
-#include "src/MemoryManager.cpp"
-#include "src/MemoryMap.cpp"
-#include "src/TrackingPolicies.cpp"
-#include "src/Utils.cpp"
+#include "src/memory_manager.cpp"
+#include "src/memory_map.cpp"
+#include "src/tracking_policies.cpp"
+#include "src/utils.cpp"
