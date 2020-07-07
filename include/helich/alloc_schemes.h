@@ -2,8 +2,8 @@
 
 // self-provided headers
 #include "macros.h"
-#include "detail/AllocRegion.h"
-#include "AllocHeaders.h"
+#include "detail/alloc_region.h"
+#include "alloc_headers.h"
 
 // 3rd-party headers
 #include <floral.h>
@@ -137,4 +137,4 @@ public:
 
 }
 
-#include "AllocSchemes.hpp"
+#include "alloc_schemes.hpp"

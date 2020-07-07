@@ -2,7 +2,7 @@
 
 #include <floral.h>
 
-#include "detail/AllocRegion.h"
+#include "detail/alloc_region.h"
 
 namespace helich {
 	template <class t_allocator_type>

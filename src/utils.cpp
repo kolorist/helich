@@ -1,5 +1,5 @@
 // self-provided headers
-#include "helich/Utils.h"
+#include "helich/utils.h"
 
 namespace helich {
 

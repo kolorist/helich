@@ -1,4 +1,4 @@
-#include "Allocator.h"
+#include "allocator.h"
 
 namespace helich {
 	template <template<typename> class t_alloc_scheme, class t_tracking>

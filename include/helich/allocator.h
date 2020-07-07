@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TrackingPolicies.h"
+#include "tracking_policies.h"
 
 // 3rd-party headers
 #include <floral/stdaliases.h>
@@ -147,4 +147,4 @@ public:
 
 }
 
-#include "Allocator.hpp"
+#include "allocator.hpp"

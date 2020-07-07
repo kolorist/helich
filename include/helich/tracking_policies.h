@@ -1,7 +1,7 @@
 #pragma once
 // self-provided headers
-#include "AllocHeaders.h"
-#include "AllocSchemes.h"
+#include "alloc_headers.h"
+#include "alloc_schemes.h"
 
 // 3rd-party headers
 #include <floral/stdaliases.h>
