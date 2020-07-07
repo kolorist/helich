@@ -11,6 +11,7 @@
 
 namespace helich
 {
+// ----------------------------------------------------------------------------
 
 // this function need to be called by users before using helich
 extern void init_memory_system();
@@ -30,16 +31,17 @@ public:
 	const voidptr								allocate_global_memory(voidptr i_baseAddress, const size i_sizeInBytes);
 
 	template <class ... t_allocator_regions>
-	const void initialize(t_allocator_regions ... i_regions) {
-		if (!m_base_address) {
+	const void initialize(t_allocator_regions ... i_regions)
+	{
+		if (!m_base_address)
+		{
 			size totalSize = internal_compute_mem(i_regions...);
 
 			// this call will update m_base_address
 			allocate_global_memory(nullptr, totalSize);
 			p_mem_regions_count = 0;
 
-			internal_init(m_base_address, 
-				i_regions...);
+			internal_init(m_base_address, i_regions...);
 		}
 	}
 
@@ -135,4 +137,5 @@ public:
 	size										p_total_mem_in_bytes;
 };
 
+// ----------------------------------------------------------------------------
 }

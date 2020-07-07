@@ -8,7 +8,9 @@
 #else
 #endif
 
-namespace helich {
+namespace helich
+{
+// ----------------------------------------------------------------------------
 
 memory_manager::memory_manager()
 	: m_base_address(nullptr)
@@ -34,4 +36,5 @@ const voidptr memory_manager::allocate_global_memory(voidptr i_baseAddress, cons
 	return m_base_address;
 }
 
+// ----------------------------------------------------------------------------
 }
