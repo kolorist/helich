@@ -95,6 +95,12 @@ public:
 		return (t_object_type*)addr;
 	}
 
+	template <class t_object_type>
+	t_object_type* allocate_podarray(const size i_elemCount, const_cstr i_desc = nullptr)
+	{
+		return (t_object_type*)allocate(sizeof(t_object_type) * i_elemCount, i_desc);
+	}
+
 	voidptr reallocate(void* i_ptr, const size i_newBytes)
 	{
 		return t_alloc_scheme<t_tracking_policy>::reallocate(i_ptr, i_newBytes);
