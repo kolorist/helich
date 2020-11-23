@@ -3,6 +3,7 @@
 #include "utils.h"
 
 #include <floral/assert/assert.h>
+#include <floral/math/utils.h>
 
 #include <cassert>
 #include <string.h>
@@ -444,7 +445,8 @@ voidptr freelist_scheme<t_tracking>::reallocate(voidptr i_data, const size i_new
 		alloc_header_t* releaseBlock = (alloc_header_t*)((p8)i_data - sizeof(alloc_header_t));
 		size dataSizeBytes = releaseBlock->frame_size - sizeof(alloc_header_t) - HL_ALIGNMENT;
 
-		memcpy(newAllocation, i_data, dataSizeBytes);
+		// NOTE: sometimes, the reallocated size is smaller than the previously allocated size.
+		memcpy(newAllocation, i_data, floral::min(i_newBytes, dataSizeBytes));
 
 		// now we can free the old data
 		// FIXME: this will trigger the recursive mutex mechanism, it's BAD. Please google.
