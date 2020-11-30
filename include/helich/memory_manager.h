@@ -29,6 +29,7 @@ public:
 	~memory_manager();
 
 	const voidptr								allocate_global_memory(voidptr i_baseAddress, const size i_sizeInBytes);
+	void										free_global_memory(voidptr i_baseAddress, const size i_sizeInBytes);
 
 	template <class ... t_allocator_regions>
 	const void initialize(t_allocator_regions ... i_regions)
@@ -38,11 +39,28 @@ public:
 			size totalSize = internal_compute_mem(i_regions...);
 
 			// this call will update m_base_address
-			allocate_global_memory(nullptr, totalSize);
+			m_base_address = allocate_global_memory(nullptr, totalSize);
 			p_mem_regions_count = 0;
 
 			internal_init(m_base_address, i_regions...);
 		}
+	}
+
+	template <class t_allocator>
+	const void initialize_allocator(memory_region<t_allocator>& i_region)
+	{
+		size totalSize = i_region.size_in_bytes;
+		voidptr addr = allocate_global_memory(nullptr, totalSize);
+
+		((t_allocator*)(i_region.allocator_ptr))->map_to(addr, i_region.size_in_bytes, i_region.name);
+	}
+
+	template <class t_allocator>
+	const void destroy_allocator(memory_region<t_allocator>& i_region)
+	{
+		size totalSize = i_region.size_in_bytes;
+		voidptr baseAddr = (voidptr)((t_allocator*)(i_region.allocator_ptr)->get_base_address());
+		free_global_memory(baseAddr, totalSize);
 	}
 
 private:
@@ -60,18 +78,18 @@ private:
 	}
 
 	template <class t_allocator_type>
-	const bool InternalInitTracking(voidptr i_baseAddress, 
-		memory_region<t_allocator_type> i_al) 
+	const bool internal_init_tracking(voidptr i_baseAddress,
+		memory_region<t_allocator_type> i_al)
 	{
-        typedef typename t_allocator_type::alloc_scheme_t scheme_t;
-        typedef typename scheme_t::alloc_region_t region_t;
+		typedef typename t_allocator_type::alloc_scheme_t scheme_t;
+		typedef typename scheme_t::alloc_region_t region_t;
 
 		((t_allocator_type*)(i_al.allocator_ptr))->map_to(i_baseAddress, i_al.size_in_bytes, i_al.name);
 
 		strcpy(p_mem_regions[p_mem_regions_count].name, "helich/tracking");
 		p_mem_regions[p_mem_regions_count].size_in_bytes = MEMORY_TRACKING_SIZE;
 		p_mem_regions[p_mem_regions_count].base_address = i_baseAddress;
-        p_mem_regions[p_mem_regions_count].dbg_info_extractor = (dbginfo_extractor_func_t)&alloc_region_dbginfo_extractor<region_t>::extract_info;
+		p_mem_regions[p_mem_regions_count].dbg_info_extractor = (dbginfo_extractor_func_t)&alloc_region_dbginfo_extractor<region_t>::extract_info;
 		p_mem_regions[p_mem_regions_count].allocator_ptr = (voidptr)i_al.allocator_ptr;
 		p_total_mem_in_bytes += MEMORY_TRACKING_SIZE;
 		p_mem_regions_count++;
@@ -83,23 +101,23 @@ private:
 	const bool internal_init(voidptr i_baseAddress,
 		memory_region<t_allocator_type> i_al)
 	{
-        typedef typename t_allocator_type::alloc_scheme_t scheme_t;
-        typedef typename scheme_t::alloc_region_t region_t;
+		typedef typename t_allocator_type::alloc_scheme_t scheme_t;
+		typedef typename scheme_t::alloc_region_t region_t;
 
 		((t_allocator_type*)(i_al.allocator_ptr))->map_to(i_baseAddress, i_al.size_in_bytes, i_al.name);
 
 		strcpy(p_mem_regions[p_mem_regions_count].name, i_al.name);
 		p_mem_regions[p_mem_regions_count].size_in_bytes = i_al.size_in_bytes;
 		p_mem_regions[p_mem_regions_count].base_address = i_baseAddress;
-        p_mem_regions[p_mem_regions_count].dbg_info_extractor = (dbginfo_extractor_func_t)&alloc_region_dbginfo_extractor<region_t>::extract_info;
+		p_mem_regions[p_mem_regions_count].dbg_info_extractor = (dbginfo_extractor_func_t)&alloc_region_dbginfo_extractor<region_t>::extract_info;
 		p_mem_regions[p_mem_regions_count].allocator_ptr = (voidptr)i_al.allocator_ptr;
 		p_total_mem_in_bytes += i_al.size_in_bytes;
 		p_mem_regions_count++;
 
 		// last one, tracking debug info pool
 		s8* nextBase = (s8*)i_baseAddress + i_al.size_in_bytes;
-		InternalInitTracking(nextBase,
-			memory_region<fixed_allocator<pool_scheme, sizeof(debug_entry), no_tracking_policy>> { "helich/tracking", MEMORY_TRACKING_SIZE, &g_tracking_allocator });
+		internal_init_tracking(nextBase,
+				memory_region<fixed_allocator<pool_scheme, sizeof(debug_entry), no_tracking_policy>> { "helich/tracking", MEMORY_TRACKING_SIZE, &g_tracking_allocator });
 		return true;
 	}
 
@@ -109,17 +127,17 @@ private:
 		memory_region<t_allocator_type_head> i_headAl,
 		memory_region<t_allocator_type_rests> ... i_restAl)
 	{
-        typedef typename t_allocator_type_head::alloc_scheme_t scheme_t;
-        typedef typename scheme_t::alloc_region_t region_t;
+		typedef typename t_allocator_type_head::alloc_scheme_t scheme_t;
+		typedef typename scheme_t::alloc_region_t region_t;
 
 		// init here
 		((t_allocator_type_head*)(i_headAl.allocator_ptr))->map_to(i_baseAddress, i_headAl.size_in_bytes, i_headAl.name);
 		s8* nextBase = (s8*)i_baseAddress + i_headAl.size_in_bytes;
-		
+
 		strcpy(p_mem_regions[p_mem_regions_count].name, i_headAl.name);
 		p_mem_regions[p_mem_regions_count].size_in_bytes = i_headAl.size_in_bytes;
 		p_mem_regions[p_mem_regions_count].base_address = i_baseAddress;
-        p_mem_regions[p_mem_regions_count].dbg_info_extractor = (dbginfo_extractor_func_t)&alloc_region_dbginfo_extractor<region_t>::extract_info;
+		p_mem_regions[p_mem_regions_count].dbg_info_extractor = (dbginfo_extractor_func_t)&alloc_region_dbginfo_extractor<region_t>::extract_info;
 		p_mem_regions[p_mem_regions_count].allocator_ptr = (voidptr)i_headAl.allocator_ptr;
 		p_total_mem_in_bytes += i_headAl.size_in_bytes;
 		p_mem_regions_count++;
@@ -127,7 +145,7 @@ private:
 		// recursion
 		return internal_init(nextBase, i_restAl...);
 	}
-	
+
 private:
 	voidptr                                 	m_base_address;
 
