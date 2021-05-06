@@ -3,11 +3,11 @@
 #include <floral.h>
 
 #include "macros.h"
-#include "MemoryMap.h"
-#include "Allocator.h"
-#include "AllocSchemes.h"
-#include "TrackingPolicies.h"
-#include "detail/AllocRegion.h"
+#include "memory_map.h"
+#include "allocator.h"
+#include "alloc_schemes.h"
+#include "tracking_policies.h"
+#include "detail/alloc_region.h"
 
 namespace helich
 {

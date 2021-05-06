@@ -1,7 +1,7 @@
-#include "AllocSchemes.h"
+#include "alloc_schemes.h"
 
 // self-provided headers
-#include "Utils.h"
+#include "utils.h"
 
 #include <floral/assert/assert.h>
 

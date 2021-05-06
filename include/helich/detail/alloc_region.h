@@ -3,7 +3,7 @@
 // 3rd-party headers
 #include <floral.h>
 
-#include "helich/MemoryDebug.h"
+#include "helich/memory_debug.h"
 
 namespace helich
 {
@@ -50,4 +50,4 @@ struct alloc_region_dbginfo_extractor
 
 }
 
-#include "AllocRegion.hpp"
+#include "alloc_region.hpp"

@@ -1,6 +1,6 @@
-#include "helich/TrackingPolicies.h"
+#include "helich/tracking_policies.h"
 
-#include "helich/Allocator.h"
+#include "helich/allocator.h"
 
 // 3rd-party headers
 #include <cstring>

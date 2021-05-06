@@ -1,6 +1,6 @@
-#include "helich/MemoryManager.h"
+#include "helich/memory_manager.h"
 
-#include "helich/MemoryMap.h"
+#include "helich/memory_map.h"
 
 #if defined(FLORAL_PLATFORM_WINDOWS)
 #	include <Windows.h>

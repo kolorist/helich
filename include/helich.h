@@ -1,11 +1,11 @@
 #pragma once
 
 #include <floral/stdaliases.h>
-#include <helich/Utils.h>
+#include <helich/utils.h>
 
-#include <helich/AllocSchemes.h>
-#include <helich/TrackingPolicies.h>
-#include <helich/Allocator.h>
+#include <helich/alloc_schemes.h>
+#include <helich/tracking_policies.h>
+#include <helich/allocator.h>
 
-#include <helich/MemoryManager.h>
-#include <helich/MemoryDebug.h>
+#include <helich/memory_manager.h>
+#include <helich/memory_debug.h>
