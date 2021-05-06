@@ -12,11 +12,10 @@
 namespace helich
 {
 
-// this function need to be called by users before using helich
+// this function need to be implemented by users before using helich
 extern void init_memory_system();
 
 extern fixed_allocator<pool_scheme, sizeof(debug_entry), no_tracking_policy>	g_tracking_allocator;
-extern fixed_allocator<pool_scheme, 128, no_tracking_policy>					g_description_allocator;
 
 #define MEMORY_TRACKING_SIZE					SIZE_MB(32)
 #define MAX_MEM_REGIONS							32
@@ -58,7 +57,7 @@ private:
 	}
 
 	template <class t_allocator_type>
-	const bool InternalInitTracking(voidptr i_baseAddress, 
+	const bool internal_init_tracking(voidptr i_baseAddress, 
 		memory_region<t_allocator_type> i_al) 
 	{
         typedef typename t_allocator_type::alloc_scheme_t scheme_t;
@@ -96,7 +95,7 @@ private:
 
 		// last one, tracking debug info pool
 		s8* nextBase = (s8*)i_baseAddress + i_al.size_in_bytes;
-		InternalInitTracking(nextBase,
+		internal_init_tracking(nextBase,
 			memory_region<fixed_allocator<pool_scheme, sizeof(debug_entry), no_tracking_policy>> { "helich/tracking", MEMORY_TRACKING_SIZE, &g_tracking_allocator });
 		return true;
 	}
