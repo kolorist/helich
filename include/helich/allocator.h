@@ -51,6 +51,17 @@ public:
 		((t_closure_allocator*)obj)->map_tp(baseClsAddress, i_bytes, "");
 		return obj;
 	}
+	
+	template <class t_closure_allocator>
+	t_closure_allocator* allocate_arena(const_cstr i_desc = nullptr)
+	{
+		size bytes = t_alloc_scheme<t_tracking_policy>::get_remain_bytes() - sizeof(t_closure_allocator) - HL_ALIGNMENT;
+		voidptr addr = t_alloc_scheme<t_tracking_policy>::allocate(bytes + sizeof(t_closure_allocator) + HL_ALIGNMENT, i_desc);
+		t_closure_allocator* cls = new (addr) t_closure_allocator();
+		voidptr baseClsAddress = align_address((s8*)addr + sizeof(t_closure_allocator));
+		cls->map_to(baseClsAddress, bytes, "arena");
+		return cls;
+	}
 
 	template <class t_closure_allocator>
 	t_closure_allocator* allocate_arena(const size i_bytes, const_cstr i_desc = nullptr)
