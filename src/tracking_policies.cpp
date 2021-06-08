@@ -2,17 +2,16 @@
 
 #include "helich/allocator.h"
 
-// 3rd-party headers
 #include <cstring>
 
 namespace helich
 {
+// ----------------------------------------------------------------------------
 
 fixed_allocator<pool_scheme, sizeof(debug_entry), no_tracking_policy> g_tracking_allocator;
 
 //////////////////////////////////////////////////////////////////////////
 // Default Tracking Policy
-//////////////////////////////////////////////////////////////////////////
 
 u32 default_tracking_policy::m_num_alloc = 0;
 
@@ -54,4 +53,5 @@ void default_tracking_policy::unregister_allocation(voidptr i_ptr)
 	m_num_alloc--;
 }
 
+// ----------------------------------------------------------------------------
 }

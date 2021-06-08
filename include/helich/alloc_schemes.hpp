@@ -1,11 +1,10 @@
 #include "alloc_schemes.h"
 
-// self-provided headers
 #include "utils.h"
 
 #include <floral/assert/assert.h>
+#include <floral/math/utils.h>
 
-// 3rd-party headers
 #include <cassert>
 #include <string.h>
 
@@ -13,10 +12,12 @@
 // giving to user or putting back into the free regions, but it will affect heavily the performance.
 //#define ZERO_OUT_MEMORY
 
-namespace helich {
+namespace helich
+{
+// ----------------------------------------------------------------------------
+
 //////////////////////////////////////////////////////////////////////////
 // Stack Allocation Scheme
-//////////////////////////////////////////////////////////////////////////
 template <class t_tracking>
 stack_scheme<t_tracking>::stack_scheme()
 	: alloc_region_t()
@@ -165,8 +166,8 @@ void stack_scheme<t_tracking>::free_all()
 }
 
 //////////////////////////////////////////////////////////////////////////
-// Pooling Allocation Scheme
-//////////////////////////////////////////////////////////////////////////
+// Pool Allocation Scheme
+
 template <size t_elem_size, class t_tracking>
 pool_scheme<t_elem_size, t_tracking>::pool_scheme()
 	: alloc_region_t()//alloc_region_t::p_last_alloc(nullptr)
@@ -292,10 +293,9 @@ void pool_scheme<t_elem_size, t_tracking>::free_all()
 	alloc_region_t::p_used_bytes = 0;
 }
 
-
 //////////////////////////////////////////////////////////////////////////
 // Freelist Allocation Scheme
-//////////////////////////////////////////////////////////////////////////
+
 template <class t_tracking>
 freelist_scheme<t_tracking>::freelist_scheme()
 	: alloc_region_t()
@@ -445,7 +445,8 @@ voidptr freelist_scheme<t_tracking>::reallocate(voidptr i_data, const size i_new
 		alloc_header_t* releaseBlock = (alloc_header_t*)((p8)i_data - sizeof(alloc_header_t));
 		size dataSizeBytes = releaseBlock->frame_size - sizeof(alloc_header_t) - HL_ALIGNMENT;
 
-		memcpy(newAllocation, i_data, dataSizeBytes);
+		// NOTE: sometimes, the reallocated size is smaller than the previously allocated size.
+		memcpy(newAllocation, i_data, floral::min(i_newBytes, dataSizeBytes));
 
 		// now we can free the old data
 		// FIXME: this will trigger the recursive mutex mechanism, it's BAD. Please google.
@@ -571,4 +572,6 @@ void freelist_scheme<t_tracking>::free_all()
 	m_first_free_block->next_alloc = nullptr;
 	m_first_free_block->prev_alloc = nullptr;
 }
+
+// ----------------------------------------------------------------------------
 }

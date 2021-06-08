@@ -2,6 +2,7 @@
 
 namespace helich
 {
+// ----------------------------------------------------------------------------
 
 template <class t_alloc_region>
 void alloc_region_dbginfo_extractor<t_alloc_region>::extract_info(voidptr i_allocRegion, debug_memory_block* i_memBlocks,
@@ -31,4 +32,5 @@ void alloc_region_dbginfo_extractor<t_alloc_region>::extract_info(voidptr i_allo
 	o_numBlocks = numAllocBlocks;
 }
 
+// ----------------------------------------------------------------------------
 }

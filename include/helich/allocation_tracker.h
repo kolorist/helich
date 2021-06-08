@@ -1,13 +1,15 @@
 #pragma once
 
 #include "macros.h"
-#include "PoolAllocator.h"
 
 #include <floral/stdaliases.h>
 
-namespace helich {
+namespace helich
+{
+// ----------------------------------------------------------------------------
 
-class allocation_tracker {
+class allocation_tracker
+{
 public:
 	static const u32							sk_header_pool_size = 512;
 
@@ -29,4 +31,5 @@ private:
 
 extern allocation_tracker						g_allocation_tracker;
 
+// ----------------------------------------------------------------------------
 }
