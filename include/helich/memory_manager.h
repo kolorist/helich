@@ -19,7 +19,7 @@ extern void init_memory_system();
 extern fixed_allocator<pool_scheme, sizeof(debug_entry), no_tracking_policy>	g_tracking_allocator;
 extern fixed_allocator<pool_scheme, 128, no_tracking_policy>					g_description_allocator;
 
-#define MEMORY_TRACKING_SIZE					SIZE_MB(32)
+#define MEMORY_TRACKING_SIZE					SIZE_MB(1)
 #define MAX_MEM_REGIONS							32
 
 class memory_manager
