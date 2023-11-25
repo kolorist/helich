@@ -1,5 +1,5 @@
 # 1. required version
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.20min)
 
 # 2. initial setup
 project (helich)
@@ -42,9 +42,11 @@ if (${TARGET_PLATFORM} STREQUAL "arm64-v8a")
 elseif (${TARGET_PLATFORM} STREQUAL "arm-v7a")
 
 elseif (${TARGET_PLATFORM} STREQUAL "x86")
-
+    target_compile_definitions(helich
+        PUBLIC NOMINMAX)
 elseif (${TARGET_PLATFORM} STREQUAL "x64")
-
+    target_compile_definitions(helich
+        PUBLIC NOMINMAX)
 endif ()
 
 target_include_directories (helich
